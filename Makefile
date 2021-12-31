@@ -8,11 +8,16 @@ ofiles  := $(addprefix ./build/, $(notdir $(temp)))
 libs    := $(shell pkg-config --libs gtkmm-3.0)
 libs    += $(shell pkg-config --libs glib-2.0)
 libs    += $(shell pkg-config --libs gio-2.0) 
+libs    += $(shell pkg-config --libs gtksourceviewmm-3.0) 
+
 
 cflags  := $(shell pkg-config --cflags gtkmm-3.0)
 cflags  += $(shell pkg-config --cflags glib-2.0)
 cflags  += $(shell pkg-config --cflags gio-2.0)
+cflags  += $(shell pkg-config --cflags gtksourceviewmm-3.0)
+
 ######################################################
+
 
 main: $(cfiles) $(hfiles) $(ofiles)
 	@echo "Compiling Main HyperText v0.1.0"
@@ -20,9 +25,9 @@ main: $(cfiles) $(hfiles) $(ofiles)
 
 # object files
 
-./build/tab.o:
+./build/tab.o: ./src/component/tab.cc ./src/header/tab.h
 	@printf "Compiling tab.cc ~> tab.o"
-	@g++ -c $(cflags) ./src/component/tab.cc -o ./build/tab.o $(libs)
+	@g++ -c $(cflags) ./src/component/tab.cc -o ./build/tab.o 
 	@echo " => [ok]"
 
 
@@ -41,5 +46,6 @@ main: $(cfiles) $(hfiles) $(ofiles)
 # to run from make
 
 run:
+	@clear
 	@make
 	@./build/hyper_text

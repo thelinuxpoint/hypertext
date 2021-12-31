@@ -1,15 +1,27 @@
 #include "../header/window.h"
 
+#include <gtksourceviewmm.h>
+
+// #include <gtksourceview/gtksource.h>
 #include <gtkmm.h>
 #include <vector>
 #include <iostream>
 
-hyp::HypWindow::HypWindow(): Gtk::ApplicationWindow(), m_Box(Gtk::ORIENTATION_VERTICAL){
-    set_title("Hyper Text");
-    set_default_size(600, 500);
 
-    // ExampleApplication displays the menubar. Other stuff, such as a toolbar,
-    // is put into the box.
+hyp::HypWindow::HypWindow(): Gtk::ApplicationWindow(), m_Box(Gtk::ORIENTATION_VERTICAL){
+    
+    set_title("Hyper Text");
+    set_default_size(700, 500);
+
+    insert_tab();
+    insert_tab();
+
+    middle_window.add1(h);
+    middle_window.add2(nb);
+
+    grand_window.add(middle_window);
+
+   
     add(grand_window);
 
   // Create actions for menus and toolbars.
@@ -85,57 +97,75 @@ hyp::HypWindow::HypWindow(): Gtk::ApplicationWindow(), m_Box(Gtk::ORIENTATION_VE
     if (!toolbar)
         g_warning("GtkToolbar not found");
     else
-        grand_window.pack_end(*toolbar, Gtk::PACK_SHRINK);
+        grand_window.pack_end(*toolbar, false,false,0);
+}
+/////////////////////////////////
+void hyp::HypWindow::insert_tab(){
+    vec_text.push_back(Gsv::View());
+
+    vec_scroll.push_back(Gtk::ScrolledWindow());
+    vec_scroll[count].add(vec_text[count]);
+    //
+    Gtk::Box *box = new Gtk::Box();
+    Gtk::Button *but = new Gtk::Button();
+    Gtk::Label *d = new Gtk::Label("Page 1");
+    but->set_image_from_icon_name("window-close");
+    but->set_relief(Gtk::RELIEF_NONE);
+    box->pack_start(*d,true,true,2);
+    box->pack_end(*but,false,false,0);
+    box->show_all();
+
+    nb.append_page(vec_scroll[count],*box);
+    count+=1;
+
 }
 
+
+
+
+//////////////////////////////////
 hyp::HypWindow::~HypWindow(){}
 
 void hyp::HypWindow::on_menu_others(){
-  std::cout << "A menu item was selected." << std::endl;
+    std::cout << "A menu item was selected." << std::endl;
 }
-
-void hyp::HypWindow::on_menu_choices(const Glib::ustring& parameter)
-{
+/////////////////////////////////
+void hyp::HypWindow::on_menu_choices(const Glib::ustring& parameter){
   //The radio action's state does not change automatically:
-  m_refChoice->change_state(parameter);
+    m_refChoice->change_state(parameter);
 
-  Glib::ustring message;
-  if (parameter == "a")
-    message = "Choice a was selected.";
-  else
-    message = "Choice b was selected.";
+    Glib::ustring message;
+    if (parameter == "a")
+        message = "Choice a was selected.";
+    else
+        message = "Choice b was selected.";
+    std::cout << message << std::endl;
+}
+/////////////////////////////////////
+void hyp::HypWindow::on_menu_choices_other(int parameter){
+    //The radio action's state does not change automatically:
+    m_refChoiceOther->change_state(parameter);
 
-  std::cout << message << std::endl;
+    Glib::ustring message;
+    if (parameter == 1)
+        message = "Choice 1 was selected.";
+    else
+        message = "Choice 2 was selected.";
+    std::cout << message << std::endl;
 }
 
-void hyp::HypWindow::on_menu_choices_other(int parameter)
-{
-  //The radio action's state does not change automatically:
-  m_refChoiceOther->change_state(parameter);
+void hyp::HypWindow::on_menu_toggle(){
+    bool active = false;
+    m_refToggle->get_state(active);
+    //The toggle action's state does not change automatically:
+    active = !active;
+    m_refToggle->change_state(active);
 
-  Glib::ustring message;
-  if (parameter == 1)
-    message = "Choice 1 was selected.";
-  else
-    message = "Choice 2 was selected.";
+    Glib::ustring message;
+    if (active)
+        message = "Toggle is active.";
+    else
+        message = "Toggle is not active.";
 
-  std::cout << message << std::endl;
-}
-
-void hyp::HypWindow::on_menu_toggle()
-{
-  bool active = false;
-  m_refToggle->get_state(active);
-
-  //The toggle action's state does not change automatically:
-  active = !active;
-  m_refToggle->change_state(active);
-
-  Glib::ustring message;
-  if (active)
-    message = "Toggle is active.";
-  else
-    message = "Toggle is not active.";
-
-  std::cout << message << std::endl;
+    std::cout << message << std::endl;
 }

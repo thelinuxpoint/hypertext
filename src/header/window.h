@@ -1,7 +1,8 @@
 #include <gtkmm.h>
+#include <gtksourceviewmm.h>
 
 
-#include <gtkmm.h>
+
 namespace hyp{
 	class HypWindow : public Gtk::ApplicationWindow {
 		public:
@@ -11,7 +12,18 @@ namespace hyp{
   			Gtk::VBox grand_window;
 			Gtk::HPaned middle_window;
 			Gtk::HBox h,c;
-			Gtk::Button b1,b2,b3;
+			Gtk::VBox tab_win;
+
+			Gtk::Button x;
+			int count=0;
+			Gtk::Notebook nb;
+
+			Gtk::TextView txt_v;
+
+			Gtk::ScrolledWindow sw;
+
+			std::vector<Gtk::ScrolledWindow> vec_scroll;
+			std::vector<Gsv::View> vec_text;
 
 		protected:
   			//Signal handlers:
@@ -20,6 +32,10 @@ namespace hyp{
   			void on_menu_choices(const Glib::ustring& parameter);
   			void on_menu_choices_other(int parameter);
   			void on_menu_toggle();
+
+
+  			// tab handler
+  			void insert_tab();
 
   			//Child widgets:
   			Gtk::Box m_Box;
