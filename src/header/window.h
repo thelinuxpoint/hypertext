@@ -1,5 +1,7 @@
 #include <gtkmm.h>
 #include <gtksourceviewmm.h>
+#include <set>
+#include <list>
 
 
 
@@ -22,7 +24,10 @@ namespace hyp{
 			Gtk::ScrolledWindow sw;
 			std::vector<Gtk::ScrolledWindow> vec_scroll;
 			std::vector<Gsv::View> vec_text;
+			std::set<int> tracker;
+			
 
+  			void on_tab_closed(int c);
 		protected:
   			//Signal handlers:
   			void on_menu_others();
@@ -34,6 +39,10 @@ namespace hyp{
 
   			// tab handler
   			void insert_tab();
+  			// close tab
+
+
+
 
   			//Child widgets:
   			Gtk::Box m_Box;

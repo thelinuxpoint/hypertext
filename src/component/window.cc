@@ -6,8 +6,9 @@
 #include <gtkmm.h>
 #include <vector>
 #include <iostream>
-
-
+#include <functional>
+#include <set>
+#include <iterator>
 hyp::HypWindow::HypWindow(): Gtk::ApplicationWindow(), m_Box(Gtk::ORIENTATION_VERTICAL){
     
     set_title("Hyper Text");
@@ -74,8 +75,8 @@ hyp::HypWindow::HypWindow(): Gtk::ApplicationWindow(), m_Box(Gtk::ORIENTATION_VE
     "      <object class='GtkToolButton' id='toolbutton_new'>"
     "        <property name='visible'>True</property>"
     "        <property name='can_focus'>False</property>"
-    "        <property name='tooltip_text' translatable='yes'>New Standard</property>"
-    "        <property name='action_name'>app.newstandard</property>"
+    "        <property name='tooltip_text' translatable='yes'>New File</property>"
+    "        <property name='action_name'>win.newfile</property>"
     "        <property name='icon_name'>document-new</property>"
     "      </object>"
     "      <packing>"
@@ -123,7 +124,8 @@ void hyp::HypWindow::insert_tab(){
     //
     Gtk::Box *box = new Gtk::Box();
     Gtk::Button *but = new Gtk::Button();
-    Gtk::Label *d = new Gtk::Label("Page 1");
+    Gtk::Label *d = new Gtk::Label("untitled");
+    but->signal_clicked().connect( sigc::bind(sigc::mem_fun(*this,&hyp::HypWindow::on_tab_closed),count));
     vec_text[count].set_show_line_numbers(true);
     vec_text[count].set_monospace(true);
     
@@ -135,12 +137,25 @@ void hyp::HypWindow::insert_tab(){
     box->show_all();
 
     nb.append_page(vec_scroll[count],*box);
+
+    tracker.insert(count);
     count+=1;
+
     show_all();
 
 }
+//////////////////////////////////
 
+void hyp::HypWindow::on_tab_closed(int c){
+    std::cout<<"Closing Tab : ";
+    auto itrs = tracker.begin();
+    auto itre = tracker.find(c);
+    std::cout<<std::distance(itrs,itre)<<std::endl;
+    nb.remove_page((int)std::distance(itrs,itre));
+    tracker.erase(c);
+    show_all();
 
+}
 
 
 //////////////////////////////////
