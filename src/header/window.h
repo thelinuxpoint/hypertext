@@ -12,16 +12,14 @@ namespace hyp{
   			Gtk::VBox grand_window;
 			Gtk::HPaned middle_window;
 			Gtk::HBox h,c;
-			Gtk::VBox tab_win;
+			Gtk::VBox tree;
 
 			Gtk::Button x;
 			int count=0;
 			Gtk::Notebook nb;
-
+			Gtk::ScrolledWindow *sw_nb;
 			Gtk::TextView txt_v;
-
 			Gtk::ScrolledWindow sw;
-
 			std::vector<Gtk::ScrolledWindow> vec_scroll;
 			std::vector<Gsv::View> vec_text;
 

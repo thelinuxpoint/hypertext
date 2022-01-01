@@ -18,7 +18,7 @@ void hyp::HypTextApp::on_startup(){
   	//We can use add_action() because Gtk::Application derives from Gio::ActionMap.
 
   	//File|New sub menu:
-  	add_action("newstandard",sigc::mem_fun(*this, &hyp::HypTextApp::on_menu_file_new_generic));
+  	// add_action("newfile",sigc::mem_fun(*this, &hyp::HypTextApp::on_menu_file_new_generic));
 
   	add_action("newfoo",sigc::mem_fun(*this, &hyp::HypTextApp::on_menu_file_new_generic));
 
@@ -43,7 +43,7 @@ void hyp::HypTextApp::on_startup(){
     "      <section>"
     "        <item>"
     "          <attribute name='label' translatable='yes'>New _File</attribute>"
-    "          <attribute name='action'>app.newstandard</attribute>"
+    "          <attribute name='action'>win.newfile</attribute>"
     "          <attribute name='accel'>&lt;Primary&gt;n</attribute>"
     "        </item>"
     "        <item>"

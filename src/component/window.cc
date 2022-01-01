@@ -12,11 +12,24 @@ hyp::HypWindow::HypWindow(): Gtk::ApplicationWindow(), m_Box(Gtk::ORIENTATION_VE
     
     set_title("Hyper Text");
     set_default_size(700, 500);
+    Gdk::Color c;
+    c.set_rgb(24,25,21);
 
-    insert_tab();
-    insert_tab();
+    Glib::ustring data;
+    data="textview text {color : crimson; font-size:50px; font-family:monospace; font-weight:bold;} "; 
 
-    middle_window.add1(h);
+    nb.set_scrollable(true);
+
+    auto css = Gtk::CssProvider::create();
+    if(not css->load_from_data(data)) {
+      std::cerr << "Failed to load css\n";
+      std::exit(1);
+  }
+    auto screen = Gdk::Screen::get_default();
+    auto ctx = grand_window.get_style_context();
+    ctx->add_provider_for_screen(screen, css, GTK_STYLE_PROVIDER_PRIORITY_APPLICATION);
+
+    middle_window.add1(tree);
     middle_window.add2(nb);
 
     grand_window.add(middle_window);
@@ -34,6 +47,7 @@ hyp::HypWindow::HypWindow(): Gtk::ApplicationWindow(), m_Box(Gtk::ORIENTATION_VE
     add_action("copy", sigc::mem_fun(*this, &hyp::HypWindow::on_menu_others));
     add_action("paste", sigc::mem_fun(*this, &hyp::HypWindow::on_menu_others));
     add_action("something", sigc::mem_fun(*this, &hyp::HypWindow::on_menu_others));
+    add_action("newfile", sigc::mem_fun(*this, &hyp::HypWindow::insert_tab));
 
     //Choices menus, to demonstrate Radio items,
      //using our convenience methods for string and int radio values:
@@ -101,6 +115,7 @@ hyp::HypWindow::HypWindow(): Gtk::ApplicationWindow(), m_Box(Gtk::ORIENTATION_VE
 }
 /////////////////////////////////
 void hyp::HypWindow::insert_tab(){
+    std::cout<<"Inserting Tab"<<std::endl;
     vec_text.push_back(Gsv::View());
 
     vec_scroll.push_back(Gtk::ScrolledWindow());
@@ -109,6 +124,10 @@ void hyp::HypWindow::insert_tab(){
     Gtk::Box *box = new Gtk::Box();
     Gtk::Button *but = new Gtk::Button();
     Gtk::Label *d = new Gtk::Label("Page 1");
+    vec_text[count].set_show_line_numbers(true);
+    vec_text[count].set_monospace(true);
+    
+
     but->set_image_from_icon_name("window-close");
     but->set_relief(Gtk::RELIEF_NONE);
     box->pack_start(*d,true,true,2);
@@ -117,6 +136,7 @@ void hyp::HypWindow::insert_tab(){
 
     nb.append_page(vec_scroll[count],*box);
     count+=1;
+    show_all();
 
 }
 
