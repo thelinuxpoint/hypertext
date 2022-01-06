@@ -1,14 +1,14 @@
-#include "../header/window.h"
-
 #include <gtksourceviewmm.h>
-
-// #include <gtksourceview/gtksource.h>
 #include <gtkmm.h>
 #include <vector>
 #include <iostream>
 #include <functional>
 #include <set>
 #include <iterator>
+#include <filesystem>
+#include <thread>
+#include "../header/window.h"
+
 hyp::HypWindow::HypWindow(): Gtk::ApplicationWindow(), m_Box(Gtk::ORIENTATION_VERTICAL){
     
     set_title("Hyper Text");
@@ -17,38 +17,49 @@ hyp::HypWindow::HypWindow(): Gtk::ApplicationWindow(), m_Box(Gtk::ORIENTATION_VE
     c.set_rgb(24,25,21);
 
     Glib::ustring data;
-    data="textview text {color : crimson; font-size:50px; font-family:monospace; font-weight:bold;} "; 
+    data="textview text {color : white; font-size:50px; font-family:monospace; font-weight:bold;} "; 
 
     nb.set_scrollable(true);
 
     auto css = Gtk::CssProvider::create();
     if(not css->load_from_data(data)) {
-      std::cerr << "Failed to load css\n";
-      std::exit(1);
-  }
+        std::cerr << "Failed to load css\n";
+        std::exit(1);
+    }
     auto screen = Gdk::Screen::get_default();
     auto ctx = grand_window.get_style_context();
     ctx->add_provider_for_screen(screen, css, GTK_STYLE_PROVIDER_PRIORITY_APPLICATION);
 
+    // tree.set_margin(5);
+    Gtk::ScrolledWindow *for_tree = new Gtk::ScrolledWindow();
+    m_refTreeModel = Gtk::TreeStore::create(m_Columns);
+
+    m_TreeView = Gtk::manage(new Gtk::TreeView (m_refTreeModel));
+    m_TreeView->set_hover_selection(true);
+    m_TreeView->append_column("", m_Columns.m_col_pict);
+    // m_TreeView->set_enable_tree_lines();
+    m_TreeView->append_column("FOLDERS", m_Columns.m_col_name);
+
+    for_tree->add(*m_TreeView);
+
+    tree.add(*for_tree);
+
     middle_window.add1(tree);
     middle_window.add2(nb);
 
-    grand_window.add(middle_window);
 
-   
-    add(grand_window);
+    // m_TreeView.set_model(m_refTreeModel);
 
-  // Create actions for menus and toolbars.
-  // We can use add_action() because Gtk::ApplicationWindow derives from Gio::ActionMap.
-  // This Action Map uses a "win." prefix for the actions.
-  // Therefore, for instance, "win.copy", is used in ExampleApplication::on_startup()
-  // to layout the menu.
 
-  //Edit menu:
+    // Edit menu: ###############################################################
     add_action("copy", sigc::mem_fun(*this, &hyp::HypWindow::on_menu_others));
-    add_action("paste", sigc::mem_fun(*this, &hyp::HypWindow::on_menu_others));
-    add_action("something", sigc::mem_fun(*this, &hyp::HypWindow::on_menu_others));
+
+    add_action("openfolder", sigc::mem_fun(*this, &hyp::HypWindow::on_folder_open));
+
+    add_action("openfile", sigc::mem_fun(*this, &hyp::HypWindow::on_file_open));
+    
     add_action("newfile", sigc::mem_fun(*this, &hyp::HypWindow::insert_tab));
+    //###########################################################################
 
     //Choices menus, to demonstrate Radio items,
      //using our convenience methods for string and int radio values:
@@ -99,7 +110,6 @@ hyp::HypWindow::HypWindow(): Gtk::ApplicationWindow(), m_Box(Gtk::ORIENTATION_VE
     "    </child>"
     "  </object>"
     "</interface>";
-
     
     try{
         m_refBuilder->add_from_string(ui_info);
@@ -109,22 +119,35 @@ hyp::HypWindow::HypWindow(): Gtk::ApplicationWindow(), m_Box(Gtk::ORIENTATION_VE
     }
     Gtk::Toolbar* toolbar = nullptr;
     m_refBuilder->get_widget("toolbar", toolbar);
+
     if (!toolbar)
         g_warning("GtkToolbar not found");
     else
         grand_window.pack_end(*toolbar, false,false,0);
+  
+    // m_TreeView.append_column("ID", m_Columns.m_col_id);
+
+
+    grand_window.add(middle_window);
+
+    add(grand_window);
+
+    // show_all();
 }
-/////////////////////////////////
+//////////////////////////////////////////////////////////////////
+
 void hyp::HypWindow::insert_tab(){
-    std::cout<<"Inserting Tab"<<std::endl;
-    vec_text.push_back(Gsv::View());
+
+    std::cout<<"Inserting Tab -> Empty"<<std::endl;
+    vec_text.push_back(hyp::HypTextView("untitled","",count));
 
     vec_scroll.push_back(Gtk::ScrolledWindow());
     vec_scroll[count].add(vec_text[count]);
     //
     Gtk::Box *box = new Gtk::Box();
     Gtk::Button *but = new Gtk::Button();
-    Gtk::Label *d = new Gtk::Label("untitled");
+    Gtk::Label *d = new Gtk::Label(vec_text[count].file_name);
+
     but->signal_clicked().connect( sigc::bind(sigc::mem_fun(*this,&hyp::HypWindow::on_tab_closed),count));
     vec_text[count].set_show_line_numbers(true);
     vec_text[count].set_monospace(true);
@@ -156,14 +179,133 @@ void hyp::HypWindow::on_tab_closed(int c){
     show_all();
 
 }
+///////////////////////////////////////////////////////////////////////////
+
+void hyp::HypWindow::on_file_open(){
+    std::cout<<"Opening File : ";
+    auto dialog = Gtk::FileChooserNative::create("Please choose a file",*this,Gtk::FILE_CHOOSER_ACTION_OPEN,"Choose","Cancel");
+    dialog->run();
+    std::cout<<dialog->get_filename()<<std::endl;
+
+    std::cout<<"Inserting Tab -> Filled"<<std::endl;
+
+
+    vec_text.push_back(hyp::HypTextView(std::filesystem::path(dialog->get_filename()).filename(),dialog->get_filename(),count));
+    vec_scroll.push_back(Gtk::ScrolledWindow());
+    (vec_text[count].get_buffer())->set_text(Glib::file_get_contents(dialog->get_filename()));
+
+
+    vec_scroll[count].add(vec_text[count]);
+    //
+    Gtk::Box *box = new Gtk::Box();
+    Gtk::Button *but = new Gtk::Button();
+    Gtk::Label *d = new Gtk::Label(vec_text[count].file_name);
+
+    but->signal_clicked().connect( sigc::bind(sigc::mem_fun(*this,&hyp::HypWindow::on_tab_closed),count));
+    vec_text[count].set_show_line_numbers(true);
+    vec_text[count].set_monospace(true);
+    
+
+    but->set_image_from_icon_name("window-close");
+    but->set_relief(Gtk::RELIEF_NONE);
+    box->pack_start(*d,true,true,2);
+    box->pack_end(*but,false,false,0);
+    box->show_all();
+
+    nb.append_page(vec_scroll[count],*box);
+
+    tracker.insert(count);
+    count+=1;
+
+    show_all();
+
+}
+
+///////////////////////////////////////////////////////////////////////////
+void hyp::HypWindow::on_folder_open(){
+ 
+ std::cout<<"Opening Folder : ";
+    std::string x;
+    {
+        auto dialog = Gtk::FileChooserNative::create("Select a folder",*this,Gtk::FILE_CHOOSER_ACTION_SELECT_FOLDER,"Open","Cancel");
+        dialog->run();
+        std::cout<<dialog->get_filename()<<std::endl;
+        x=dialog->get_filename();
+    }
+    Gtk::TreeModel::Row row = *(m_refTreeModel->append());
+
+    set_dir(x,row);
+
+}
+// ////////////////////////////////////////////////
+
+void hyp::HypWindow::set_dir(std::string fold,Gtk::TreeModel::Row &row){
+
+    row[m_Columns.m_col_pict] = Gdk::Pixbuf::create_from_file("/home/prakash/Downloads/close0.svg",20,20);
+    // row[m_Columns.m_col_id] = 1;
+    row[m_Columns.m_col_name] = std::filesystem::path(fold).filename().string();
+
+    for(auto const& dir_entry: std::filesystem::directory_iterator{std::filesystem::path(fold)}){
+        
+
+        if (Glib::file_test(dir_entry.path().string(),Glib::FILE_TEST_IS_DIR)){
+            // std::cout<<"found dir : "<<dir_entry.path().string()<<std::endl;
+            Gtk::TreeModel::Row childrow = *(m_refTreeModel->append(row.children()));
+
+            set_dir(dir_entry.path().string(),childrow);
+        }else{
+
+            Gtk::TreeModel::Row childrow = *(m_refTreeModel->append(row.children()));
+            // childrow.set_expand(false);
+
+            // std::cout<<"Appending : "<<dir_entry.path().filename().string()<<std::endl;
+            childrow[m_Columns.m_col_pict] = Gdk::Pixbuf::create_from_file("/home/prakash/Downloads/aa.png",10,10);
+            // childrow[m_Columns.m_col_id] = 1;//dir_entry.path().filename().string();
+
+            childrow[m_Columns.m_col_name] = dir_entry.path().filename().string();
+
+        }
+    }
+}
+
 
 
 //////////////////////////////////
+
 hyp::HypWindow::~HypWindow(){}
+
 
 void hyp::HypWindow::on_menu_others(){
     std::cout << "A menu item was selected." << std::endl;
 }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 /////////////////////////////////
 void hyp::HypWindow::on_menu_choices(const Glib::ustring& parameter){
   //The radio action's state does not change automatically:
