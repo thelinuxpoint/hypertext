@@ -29,16 +29,16 @@ namespace hyp{
   			class ModelColumns : public Gtk::TreeModel::ColumnRecord{
   				public:
     				ModelColumns()
-    				{  
-    					add(m_col_pict);
-    					add(m_col_name);
-    				}
-
-    				Gtk::TreeModelColumn<Glib::RefPtr<Gdk::Pixbuf> > m_col_pict;
+    				{ 	add(m_col_name); }
     				Gtk::TreeModelColumn<Glib::ustring> m_col_name;
   			};
 
   			ModelColumns m_Columns;
+
+  			Gtk::TreeViewColumn *hpy_column;
+			Gtk::CellRendererPixbuf *cell_pix;
+			Gtk::CellRendererText *cell_txt;
+
 
 			Gtk::TreeView *m_TreeView;
   			Glib::RefPtr<Gtk::TreeStore> m_refTreeModel;

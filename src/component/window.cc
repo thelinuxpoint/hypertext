@@ -7,51 +7,75 @@
 #include <iterator>
 #include <filesystem>
 #include <thread>
+#include <unistd.h>
 #include "../header/window.h"
 
 hyp::HypWindow::HypWindow(): Gtk::ApplicationWindow(), m_Box(Gtk::ORIENTATION_VERTICAL){
     
     set_title("Hyper Text");
     set_default_size(700, 500);
+
     Gdk::Color c;
     c.set_rgb(24,25,21);
 
     Glib::ustring data;
+
     data="textview text {color : white; font-size:50px; font-family:monospace; font-weight:bold;} "; 
 
     nb.set_scrollable(true);
 
     auto css = Gtk::CssProvider::create();
+
     if(not css->load_from_data(data)) {
         std::cerr << "Failed to load css\n";
         std::exit(1);
     }
+
     auto screen = Gdk::Screen::get_default();
     auto ctx = grand_window.get_style_context();
     ctx->add_provider_for_screen(screen, css, GTK_STYLE_PROVIDER_PRIORITY_APPLICATION);
 
-    // tree.set_margin(5);
+
     Gtk::ScrolledWindow *for_tree = new Gtk::ScrolledWindow();
+
     m_refTreeModel = Gtk::TreeStore::create(m_Columns);
 
     m_TreeView = Gtk::manage(new Gtk::TreeView (m_refTreeModel));
+    
+    m_TreeView->set_model(m_refTreeModel);
     m_TreeView->set_hover_selection(true);
-    m_TreeView->append_column("", m_Columns.m_col_pict);
-    // m_TreeView->set_enable_tree_lines();
-    m_TreeView->append_column("FOLDERS", m_Columns.m_col_name);
 
+    hpy_column = new Gtk::TreeViewColumn();
+    cell_pix = new Gtk::CellRendererPixbuf();
+    cell_txt = new Gtk::CellRendererText();
+
+    cell_pix->set_property("pixbuf-expander-open", Gdk::Pixbuf::create_from_file( (std::string(get_current_dir_name())+"/src/resource/open0.svg")));
+    cell_pix->set_property("pixbuf-expander-closed", Gdk::Pixbuf::create_from_file( (std::string(get_current_dir_name())+"/src/resource/close0.svg")));
+
+    cell_pix->set_padding(5,2);
+    hpy_column->pack_start(*cell_pix,false);
+    hpy_column->pack_start(*cell_txt, true);
+
+    hpy_column->add_attribute(*cell_txt,"text", 0);
+    hpy_column->set_title("Folders");
+
+    int x = m_TreeView->append_column(*hpy_column);
+    m_TreeView->get_column(x-1)->add_attribute(*cell_pix,"stock-id",m_Columns.m_col_name);
+
+
+    // ADD #####################################################################
     for_tree->add(*m_TreeView);
-
     tree.add(*for_tree);
 
     middle_window.add1(tree);
     middle_window.add2(nb);
+    //##########################################################################
+
+    
 
 
-    // m_TreeView.set_model(m_refTreeModel);
 
-
-    // Edit menu: ###############################################################
+    // Edit menu ################################################################
     add_action("copy", sigc::mem_fun(*this, &hyp::HypWindow::on_menu_others));
 
     add_action("openfolder", sigc::mem_fun(*this, &hyp::HypWindow::on_folder_open));
@@ -72,7 +96,7 @@ hyp::HypWindow::HypWindow(): Gtk::ApplicationWindow(), m_Box(Gtk::ORIENTATION_VE
     add_action("about", sigc::mem_fun(*this, &hyp::HypWindow::on_menu_others));
 
     //Create the toolbar and add it to a container widget:
-
+    //##########################################################################
     m_refBuilder = Gtk::Builder::create();
 
     Glib::ustring ui_info =
@@ -110,7 +134,8 @@ hyp::HypWindow::HypWindow(): Gtk::ApplicationWindow(), m_Box(Gtk::ORIENTATION_VE
     "    </child>"
     "  </object>"
     "</interface>";
-    
+    //##########################################################################
+
     try{
         m_refBuilder->add_from_string(ui_info);
     }
@@ -125,14 +150,11 @@ hyp::HypWindow::HypWindow(): Gtk::ApplicationWindow(), m_Box(Gtk::ORIENTATION_VE
     else
         grand_window.pack_end(*toolbar, false,false,0);
   
-    // m_TreeView.append_column("ID", m_Columns.m_col_id);
-
 
     grand_window.add(middle_window);
 
     add(grand_window);
 
-    // show_all();
 }
 //////////////////////////////////////////////////////////////////
 
@@ -241,7 +263,7 @@ void hyp::HypWindow::on_folder_open(){
 
 void hyp::HypWindow::set_dir(std::string fold,Gtk::TreeModel::Row &row){
 
-    row[m_Columns.m_col_pict] = Gdk::Pixbuf::create_from_file("/home/prakash/Downloads/close0.svg",20,20);
+    // row[m_Columns.m_col_pict] = Gdk::Pixbuf::create_from_file("/home/prakash/Downloads/close0.svg",20,20);
     // row[m_Columns.m_col_id] = 1;
     row[m_Columns.m_col_name] = std::filesystem::path(fold).filename().string();
 
@@ -259,7 +281,7 @@ void hyp::HypWindow::set_dir(std::string fold,Gtk::TreeModel::Row &row){
             // childrow.set_expand(false);
 
             // std::cout<<"Appending : "<<dir_entry.path().filename().string()<<std::endl;
-            childrow[m_Columns.m_col_pict] = Gdk::Pixbuf::create_from_file("/home/prakash/Downloads/aa.png",10,10);
+            // childrow[m_Columns.m_col_pict] = Gdk::Pixbuf::create_from_file("/home/prakash/Downloads/aa.png",10,10);
             // childrow[m_Columns.m_col_id] = 1;//dir_entry.path().filename().string();
 
             childrow[m_Columns.m_col_name] = dir_entry.path().filename().string();
