@@ -52,28 +52,31 @@ hyp::HypWindow::HypWindow(): Gtk::ApplicationWindow(), m_Box(Gtk::ORIENTATION_VE
     cell_pix->set_property("pixbuf-expander-open", Gdk::Pixbuf::create_from_file( (std::string(get_current_dir_name())+"/src/resource/open0.svg")));
     cell_pix->set_property("pixbuf-expander-closed", Gdk::Pixbuf::create_from_file( (std::string(get_current_dir_name())+"/src/resource/close0.svg")));
 
-    cell_pix->set_padding(5,2);
+    cell_pix->set_padding(3,1);
+
     hpy_column->pack_start(*cell_pix,false);
     hpy_column->pack_start(*cell_txt, true);
 
     hpy_column->add_attribute(*cell_txt,"text", 0);
-    hpy_column->set_title("Folders");
+    hpy_column->add_attribute(*cell_pix,"pixbuf", 1);
+
+    hpy_column->set_title(" Folders");
 
     int x = m_TreeView->append_column(*hpy_column);
+
     m_TreeView->get_column(x-1)->add_attribute(*cell_pix,"stock-id",m_Columns.m_col_name);
 
 
     // ADD #####################################################################
+    // treeview to scrollbar
     for_tree->add(*m_TreeView);
+    //scrollbar to vbox
     tree.add(*for_tree);
-
+    //vbox to middle window
     middle_window.add1(tree);
+    // notebook to middle window
     middle_window.add2(nb);
     //##########################################################################
-
-    
-
-
 
     // Edit menu ################################################################
     add_action("copy", sigc::mem_fun(*this, &hyp::HypWindow::on_menu_others));
@@ -86,7 +89,7 @@ hyp::HypWindow::HypWindow(): Gtk::ApplicationWindow(), m_Box(Gtk::ORIENTATION_VE
     //###########################################################################
 
     //Choices menus, to demonstrate Radio items,
-     //using our convenience methods for string and int radio values:
+    //using our convenience methods for string and int radio values:
     m_refChoice = add_action_radio_string("choice",sigc::mem_fun(*this, &hyp::HypWindow::on_menu_choices), "a");
 
     m_refChoiceOther = add_action_radio_integer("choiceother",sigc::mem_fun(*this, &hyp::HypWindow::on_menu_choices_other), 1);
@@ -94,11 +97,11 @@ hyp::HypWindow::HypWindow(): Gtk::ApplicationWindow(), m_Box(Gtk::ORIENTATION_VE
     m_refToggle = add_action_bool("sometoggle",sigc::mem_fun(*this, &hyp::HypWindow::on_menu_toggle), false);
     //Help menu:
     add_action("about", sigc::mem_fun(*this, &hyp::HypWindow::on_menu_others));
-
+    
+    //##########################################################################
     //Create the toolbar and add it to a container widget:
     //##########################################################################
     m_refBuilder = Gtk::Builder::create();
-
     Glib::ustring ui_info =
     "<!-- Generated with glade 3.18.3 -->"
     "<interface>"
@@ -150,11 +153,11 @@ hyp::HypWindow::HypWindow(): Gtk::ApplicationWindow(), m_Box(Gtk::ORIENTATION_VE
     else
         grand_window.pack_end(*toolbar, false,false,0);
   
-
+    // middlewindow to main window
     grand_window.add(middle_window);
-
+    // main window to Final Window
     add(grand_window);
-
+    //                                  END
 }
 //////////////////////////////////////////////////////////////////
 
@@ -263,8 +266,6 @@ void hyp::HypWindow::on_folder_open(){
 
 void hyp::HypWindow::set_dir(std::string fold,Gtk::TreeModel::Row &row){
 
-    // row[m_Columns.m_col_pict] = Gdk::Pixbuf::create_from_file("/home/prakash/Downloads/close0.svg",20,20);
-    // row[m_Columns.m_col_id] = 1;
     row[m_Columns.m_col_name] = std::filesystem::path(fold).filename().string();
 
     for(auto const& dir_entry: std::filesystem::directory_iterator{std::filesystem::path(fold)}){
@@ -278,18 +279,34 @@ void hyp::HypWindow::set_dir(std::string fold,Gtk::TreeModel::Row &row){
         }else{
 
             Gtk::TreeModel::Row childrow = *(m_refTreeModel->append(row.children()));
-            // childrow.set_expand(false);
+            if (dir_entry.path().filename().extension().string() == ".cc"){
+                childrow[m_Columns.m_col_pix] = Gdk::Pixbuf::create_from_file( (std::string(get_current_dir_name())+"/src/resource/cpp/cpp.svg"),24,24 );
+            }else if(dir_entry.path().filename().extension().string() == ".md"){
+                childrow[m_Columns.m_col_pix] = Gdk::Pixbuf::create_from_file( (std::string(get_current_dir_name())+"/src/resource/md/md.svg"),24,24 );
+            }else if(dir_entry.path().filename().extension().string() == ".o"){
+                childrow[m_Columns.m_col_pix] = Gdk::Pixbuf::create_from_file( (std::string(get_current_dir_name())+"/src/resource/exe.svg"),24,24 );
+            }else if(dir_entry.path().filename().extension().string() == ".svg"){
+                childrow[m_Columns.m_col_pix] = Gdk::Pixbuf::create_from_file( (std::string(get_current_dir_name())+"/src/resource/xml/xml.svg"),24,24 );
+            }else{
+                childrow[m_Columns.m_col_pix] = Gdk::Pixbuf::create_from_file( (std::string(get_current_dir_name())+"/src/resource/text2.svg"),24,24 );
 
-            // std::cout<<"Appending : "<<dir_entry.path().filename().string()<<std::endl;
-            // childrow[m_Columns.m_col_pict] = Gdk::Pixbuf::create_from_file("/home/prakash/Downloads/aa.png",10,10);
-            // childrow[m_Columns.m_col_id] = 1;//dir_entry.path().filename().string();
-
+            }
             childrow[m_Columns.m_col_name] = dir_entry.path().filename().string();
 
         }
     }
 }
 
+// Glib::RefPtr<Gdk::Pixbuf> hyp::HypWindow::file_pixbuf(std::string file_ext){
+//     if( file_ext == ".c" ){
+//         this->c_file;
+//     }else if( file_ext == ".cpp" ){
+//         this->cpp_file;
+//     }else if( file_ext == ".py" ){
+//         this->pyt_file;
+//     }
+//     return this->txt_file;
+// }
 
 
 //////////////////////////////////

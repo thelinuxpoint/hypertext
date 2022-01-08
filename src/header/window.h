@@ -2,6 +2,8 @@
 #include <gtksourceviewmm.h>
 #include <set>
 #include <list>
+#include <unistd.h>
+
 #include "../header/hyptextview.h"
 
 namespace hyp{
@@ -9,6 +11,14 @@ namespace hyp{
 		public:
   			HypWindow();
   			virtual ~HypWindow();
+  			// Glib::RefPtr<Gdk::Pixbuf> txt_file = Gdk::Pixbuf::create_from_file( (std::string(get_current_dir_name())+"/src/resource/text.svg"),20,20 );
+  			// Glib::RefPtr<Gdk::Pixbuf> hpp_file = Gdk::Pixbuf::create_from_file( (std::string(get_current_dir_name())+"/src/resource/cpp/cpp.svg"),20,20 ); 
+  			// Glib::RefPtr<Gdk::Pixbuf> cpp_file = Gdk::Pixbuf::create_from_file( (std::string(get_current_dir_name())+"/src/resource/cpp/cpp.svg"),20,20 );
+  			// Glib::RefPtr<Gdk::Pixbuf> c_file = Gdk::Pixbuf::create_from_file( (std::string(get_current_dir_name())+"/src/resource/c/c.svg"),20,20 );
+  			// Glib::RefPtr<Gdk::Pixbuf> pyt_file = Gdk::Pixbuf::create_from_file( (std::string(get_current_dir_name())+"/src/resource/python/python.svg"),20,20 );
+  			// Glib::RefPtr<Gdk::Pixbuf> rby_file = Gdk::Pixbuf::create_from_file( (std::string(get_current_dir_name())+"/src/resource/ruby/ruby.svg"),20,20 );
+  			// Glib::RefPtr<Gdk::Pixbuf> js_file = Gdk::Pixbuf::create_from_file( (std::string(get_current_dir_name())+"/src/resource/js/js.svg"),20,20 );;
+  			// Glib::RefPtr<Gdk::Pixbuf> css_file = Gdk::Pixbuf::create_from_file( (std::string(get_current_dir_name())+"/src/resource/css3/css3.svg"),20,20 );
 
   			Gtk::VBox grand_window;
 			Gtk::HPaned middle_window;
@@ -29,8 +39,10 @@ namespace hyp{
   			class ModelColumns : public Gtk::TreeModel::ColumnRecord{
   				public:
     				ModelColumns()
-    				{ 	add(m_col_name); }
+    				{ 	add(m_col_name); add(m_col_pix);
+    				}
     				Gtk::TreeModelColumn<Glib::ustring> m_col_name;
+    				Gtk::TreeModelColumn<Glib::RefPtr<Gdk::Pixbuf>> m_col_pix;
   			};
 
   			ModelColumns m_Columns;
@@ -51,6 +63,8 @@ namespace hyp{
   			void on_folder_open();
 
   			void set_dir(std::string fold,Gtk::TreeModel::Row &row);
+
+			Glib::RefPtr<Gdk::Pixbuf> file_pixbuf(std::string file_ext);
 
 		protected:
   			//Signal handlers:
