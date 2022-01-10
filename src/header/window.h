@@ -11,14 +11,6 @@ namespace hyp{
 		public:
   			HypWindow();
   			virtual ~HypWindow();
-  			// Glib::RefPtr<Gdk::Pixbuf> txt_file = Gdk::Pixbuf::create_from_file( (std::string(get_current_dir_name())+"/src/resource/text.svg"),20,20 );
-  			// Glib::RefPtr<Gdk::Pixbuf> hpp_file = Gdk::Pixbuf::create_from_file( (std::string(get_current_dir_name())+"/src/resource/cpp/cpp.svg"),20,20 ); 
-  			// Glib::RefPtr<Gdk::Pixbuf> cpp_file = Gdk::Pixbuf::create_from_file( (std::string(get_current_dir_name())+"/src/resource/cpp/cpp.svg"),20,20 );
-  			// Glib::RefPtr<Gdk::Pixbuf> c_file = Gdk::Pixbuf::create_from_file( (std::string(get_current_dir_name())+"/src/resource/c/c.svg"),20,20 );
-  			// Glib::RefPtr<Gdk::Pixbuf> pyt_file = Gdk::Pixbuf::create_from_file( (std::string(get_current_dir_name())+"/src/resource/python/python.svg"),20,20 );
-  			// Glib::RefPtr<Gdk::Pixbuf> rby_file = Gdk::Pixbuf::create_from_file( (std::string(get_current_dir_name())+"/src/resource/ruby/ruby.svg"),20,20 );
-  			// Glib::RefPtr<Gdk::Pixbuf> js_file = Gdk::Pixbuf::create_from_file( (std::string(get_current_dir_name())+"/src/resource/js/js.svg"),20,20 );;
-  			// Glib::RefPtr<Gdk::Pixbuf> css_file = Gdk::Pixbuf::create_from_file( (std::string(get_current_dir_name())+"/src/resource/css3/css3.svg"),20,20 );
 
   			Gtk::VBox grand_window;
 			Gtk::HPaned middle_window;
@@ -51,10 +43,14 @@ namespace hyp{
 			Gtk::CellRendererPixbuf *cell_pix;
 			Gtk::CellRendererText *cell_txt;
 
-
 			Gtk::TreeView *m_TreeView;
   			Glib::RefPtr<Gtk::TreeStore> m_refTreeModel;
+  			Glib::RefPtr<Gtk::TreeSelection> m_tree_selector;
+  			//#####################################################
+  			int m_row = 0;
+  			int m_child = 0;
 
+  			std::map<std::string,std::string> *folders;
 
   			void on_tab_closed(int c);
 
@@ -62,9 +58,11 @@ namespace hyp{
 
   			void on_folder_open();
 
-  			void set_dir(std::string fold,Gtk::TreeModel::Row &row);
+  			void set_dir(std::string fold,Gtk::TreeModel::Row &row,std::string);
 
-			Glib::RefPtr<Gdk::Pixbuf> file_pixbuf(std::string file_ext);
+  			bool on_row_select(const Glib::RefPtr<Gtk::TreeModel>& b, const Gtk::TreeModel::Path& c,bool a);
+			
+			void on_file_select(std::string file);
 
 		protected:
   			//Signal handlers:
