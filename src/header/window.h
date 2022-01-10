@@ -52,7 +52,9 @@ namespace hyp{
 
   			std::map<std::string,std::string> *folders;
 
-  			void on_tab_closed(int c);
+  			std::set<std::string> *selected;
+
+  			void on_tab_closed(int c,std::string);
 
   			void on_file_open();
 

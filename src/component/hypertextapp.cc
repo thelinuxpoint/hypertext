@@ -190,7 +190,7 @@ void hyp::HypTextApp::on_menu_file_new_generic(){
 }
 
 void hyp::HypTextApp::on_menu_file_quit(){
-  	std::cout << G_STRFUNC << std::endl;
+  	std::cout << "Bye ..." << std::endl;
   	quit(); // Not really necessary, when Gtk::Widget::hide() is called.
 
   // Gio::Application::quit() will make Gio::Application::run() return,

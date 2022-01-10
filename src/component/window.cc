@@ -45,7 +45,7 @@ hyp::HypWindow::HypWindow(): Gtk::ApplicationWindow(), m_Box(Gtk::ORIENTATION_VE
     
     m_TreeView->set_model(m_refTreeModel);
     // m_TreeView->set_hover_selection(true);
-    m_TreeView->set_headers_clickable(true);
+    // m_TreeView->set_headers_clickable(true);
     // m_TreeView->set_reorderable(true);
 
     m_tree_selector = m_TreeView->get_selection();
@@ -56,6 +56,7 @@ hyp::HypWindow::HypWindow(): Gtk::ApplicationWindow(), m_Box(Gtk::ORIENTATION_VE
     cell_pix = new Gtk::CellRendererPixbuf();
     cell_txt = new Gtk::CellRendererText();
     folders = new std::map<std::string,std::string>();
+    selected = new std::set<std::string>();
 
     cell_pix->set_property("pixbuf-expander-open", Gdk::Pixbuf::create_from_file( (std::string(get_current_dir_name())+"/src/resource/open0.svg")));
     cell_pix->set_property("pixbuf-expander-closed", Gdk::Pixbuf::create_from_file( (std::string(get_current_dir_name())+"/src/resource/close0.svg")));
@@ -84,6 +85,8 @@ hyp::HypWindow::HypWindow(): Gtk::ApplicationWindow(), m_Box(Gtk::ORIENTATION_VE
     middle_window.add1(tree);
     // notebook to middle window
     middle_window.add2(nb);
+
+    middle_window.set_position(0);
     //##########################################################################
 
     // Edit menu ################################################################
@@ -173,16 +176,16 @@ hyp::HypWindow::HypWindow(): Gtk::ApplicationWindow(), m_Box(Gtk::ORIENTATION_VE
 void hyp::HypWindow::insert_tab(){
 
     std::cout<<"Inserting Tab -> Empty"<<std::endl;
-    vec_text.push_back(hyp::HypTextView("untitled","",count));
+    Gtk::Label *d = new Gtk::Label("untitled");
+    vec_text.push_back(hyp::HypTextView("untitled","",d,count));
 
     vec_scroll.push_back(Gtk::ScrolledWindow());
     vec_scroll[count].add(vec_text[count]);
     //
     Gtk::Box *box = new Gtk::Box();
     Gtk::Button *but = new Gtk::Button();
-    Gtk::Label *d = new Gtk::Label(vec_text[count].file_name);
 
-    but->signal_clicked().connect( sigc::bind(sigc::mem_fun(*this,&hyp::HypWindow::on_tab_closed),count));
+    but->signal_clicked().connect( sigc::bind(sigc::mem_fun(*this,&hyp::HypWindow::on_tab_closed),count,vec_text[count].path));
     vec_text[count].set_show_line_numbers(true);
     vec_text[count].set_monospace(true);
     
@@ -203,12 +206,17 @@ void hyp::HypWindow::insert_tab(){
 
 //###############################################################################
 
-void hyp::HypWindow::on_tab_closed(int c){
+void hyp::HypWindow::on_tab_closed(int c,std::string path){
     std::cout<<"Closing Tab : ";
     auto itrs = tracker.begin();
     auto itre = tracker.find(c);
     std::cout<<std::distance(itrs,itre)<<std::endl;
     nb.remove_page((int)std::distance(itrs,itre));
+    if (path=="untitled"){
+
+    }else{
+        selected->erase(path);
+    }
     tracker.erase(c);
     show_all();
 
@@ -217,26 +225,29 @@ void hyp::HypWindow::on_tab_closed(int c){
 //###############################################################################
 
 void hyp::HypWindow::on_file_open(){
+    
+    std::cout<<"------------------------"<<std::endl;
 
     std::cout<<"Inserting Tab -> Filled"<<std::endl;
     std::cout<<"Opening File : ";
     auto dialog = Gtk::FileChooserNative::create("Please choose a file",*this,Gtk::FILE_CHOOSER_ACTION_OPEN,"Choose","Cancel");
     dialog->run();
     std::cout<<dialog->get_filename()<<std::endl;
+    std::cout<<"------------------------"<<std::endl;
 
 
-    vec_text.push_back(hyp::HypTextView(std::filesystem::path(dialog->get_filename()).filename(),dialog->get_filename(),count));
+    Gtk::Label *d = new Gtk::Label(std::filesystem::path(dialog->get_filename()).filename().string());
+    vec_text.push_back(hyp::HypTextView(std::filesystem::path(dialog->get_filename()).filename(),dialog->get_filename(),d,count));
     vec_scroll.push_back(Gtk::ScrolledWindow());
-    (vec_text[count].get_buffer())->set_text(Glib::file_get_contents(dialog->get_filename()));
+    (vec_text[count].buffer)->set_text(Glib::file_get_contents(dialog->get_filename()));
 
 
     vec_scroll[count].add(vec_text[count]);
     //
     Gtk::Box *box = new Gtk::Box();
     Gtk::Button *but = new Gtk::Button();
-    Gtk::Label *d = new Gtk::Label(vec_text[count].file_name);
 
-    but->signal_clicked().connect( sigc::bind(sigc::mem_fun(*this,&hyp::HypWindow::on_tab_closed),count));
+    but->signal_clicked().connect( sigc::bind(sigc::mem_fun(*this,&hyp::HypWindow::on_tab_closed),count,vec_text[count].path));
     vec_text[count].set_show_line_numbers(true);
     vec_text[count].set_monospace(true);
     
@@ -257,24 +268,25 @@ void hyp::HypWindow::on_file_open(){
 }
 //###############################################################################
 void hyp::HypWindow::on_file_select(std::string file){
+    std::cout<<"------------------------"<<std::endl;
     std::cout<<"Inserting Tab -> Filled"<<std::endl;
-    std::cout<<"Opening File : ";
-    
+    std::cout<<"Opening File : ";    
     std::cout<<file<<std::endl;
+    std::cout<<"------------------------"<<std::endl;
 
 
-    vec_text.push_back(hyp::HypTextView(std::filesystem::path(file).filename(),file,count));
+    Gtk::Label *d = new Gtk::Label(std::filesystem::path(file).filename().string());
+    vec_text.push_back(hyp::HypTextView(std::filesystem::path(file).filename(),file,d,count));
     vec_scroll.push_back(Gtk::ScrolledWindow());
-    (vec_text[count].get_buffer())->set_text(Glib::file_get_contents(file));
-
+    (vec_text[count].buffer)->set_text(Glib::file_get_contents(file));
+    // (vec_text[count].buffer)->set_modified();
 
     vec_scroll[count].add(vec_text[count]);
     //
     Gtk::Box *box = new Gtk::Box();
     Gtk::Button *but = new Gtk::Button();
-    Gtk::Label *d = new Gtk::Label(vec_text[count].file_name);
 
-    but->signal_clicked().connect( sigc::bind(sigc::mem_fun(*this,&hyp::HypWindow::on_tab_closed),count));
+    but->signal_clicked().connect( sigc::bind(sigc::mem_fun(*this,&hyp::HypWindow::on_tab_closed),count,vec_text[count].path));
     vec_text[count].set_show_line_numbers(true);
     vec_text[count].set_monospace(true);
     
@@ -291,13 +303,15 @@ void hyp::HypWindow::on_file_select(std::string file){
     count+=1;
 
     show_all();
+    
 }
 //###############################################################################
 bool hyp::HypWindow::on_row_select(const Glib::RefPtr<Gtk::TreeModel>& b,const Gtk::TreeModel::Path& c,bool a){
 
     // std::cout<<"Selected ... "<<std::flush<<c.to_string()<<std::endl;
-    if(std::filesystem::is_regular_file((*folders)[c.to_string()])){
+    if(std::filesystem::is_regular_file((*folders)[c.to_string()]) and (selected->count((*folders)[c.to_string()]) == 0) ){
         on_file_select((*folders)[c.to_string()]);
+        selected->insert((*folders)[c.to_string()]);
         return false;
     }
     return false;
@@ -319,6 +333,7 @@ void hyp::HypWindow::on_folder_open(){
     
     set_dir(x,row,std::to_string(m_row));
     m_row++;
+    middle_window.set_position(250);
 }
 
 //############################################################################### 
