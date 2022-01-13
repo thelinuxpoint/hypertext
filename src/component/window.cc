@@ -57,6 +57,7 @@ hyp::HypWindow::HypWindow(): Gtk::ApplicationWindow(), m_Box(Gtk::ORIENTATION_VE
     cell_txt = new Gtk::CellRendererText();
     folders = new std::map<std::string,std::string>();
     selected = new std::set<std::string>();
+    Gtk::Label file_type("Plain Text");
 
     cell_pix->set_property("pixbuf-expander-open", Gdk::Pixbuf::create_from_file( (std::string(get_current_dir_name())+"/src/resource/open0.svg")));
     cell_pix->set_property("pixbuf-expander-closed", Gdk::Pixbuf::create_from_file( (std::string(get_current_dir_name())+"/src/resource/close0.svg")));
@@ -65,11 +66,13 @@ hyp::HypWindow::HypWindow(): Gtk::ApplicationWindow(), m_Box(Gtk::ORIENTATION_VE
 
     hpy_column->pack_start(*cell_pix,false);
     hpy_column->pack_start(*cell_txt, true);
-
+    hpy_column->set_expand();
     hpy_column->add_attribute(*cell_txt,"text", 0);
     hpy_column->add_attribute(*cell_pix,"pixbuf", 1);
-
+    hpy_column->set_reorderable();
     hpy_column->set_title(" Folders");
+    m_TreeView->signal_row_expanded().connect( sigc::mem_fun(*this,&hyp::HypWindow::on_tree_click));
+
 
     int x = m_TreeView->append_column(*hpy_column);
 
@@ -163,7 +166,8 @@ hyp::HypWindow::HypWindow(): Gtk::ApplicationWindow(), m_Box(Gtk::ORIENTATION_VE
         g_warning("GtkToolbar not found");
     else
         grand_window.pack_end(*toolbar, false,false,0);
-  
+
+
     // middlewindow to main window
     grand_window.add(middle_window);
     // main window to Final Window
@@ -212,7 +216,7 @@ void hyp::HypWindow::on_tab_closed(int c,std::string path){
     auto itre = tracker.find(c);
     std::cout<<std::distance(itrs,itre)<<std::endl;
     nb.remove_page((int)std::distance(itrs,itre));
-    if (path=="untitled"){
+    if (path==""){
 
     }else{
         selected->erase(path);
@@ -307,8 +311,9 @@ void hyp::HypWindow::on_file_select(std::string file){
 }
 //###############################################################################
 bool hyp::HypWindow::on_row_select(const Glib::RefPtr<Gtk::TreeModel>& b,const Gtk::TreeModel::Path& c,bool a){
-
+    // for Debuging only:
     // std::cout<<"Selected ... "<<std::flush<<c.to_string()<<std::endl;
+    show_all();
     if(std::filesystem::is_regular_file((*folders)[c.to_string()]) and (selected->count((*folders)[c.to_string()]) == 0) ){
         on_file_select((*folders)[c.to_string()]);
         selected->insert((*folders)[c.to_string()]);
@@ -317,23 +322,42 @@ bool hyp::HypWindow::on_row_select(const Glib::RefPtr<Gtk::TreeModel>& b,const G
     return false;
 }
 
+//############################################################################### 
+
+void hyp::HypWindow::on_tree_click(const Gtk::TreeModel::iterator& iter, const Gtk::TreeModel::Path& path){
+    m_TreeView->columns_autosize();
+    show_all();
+}
 //###############################################################################
+std::string hyp::HypWindow::select_folder(){
+    std::cout<<"Opening Folder : ";
+    std::string x;
+    auto dialog = Gtk::FileChooserNative::create("Select a folder",*this,Gtk::FILE_CHOOSER_ACTION_SELECT_FOLDER,"Open","Cancel");
+    dialog->run();
+    std::cout<<dialog->get_filename()<<std::endl;
+    return dialog->get_filename();
+}
+
+//############################################################################### 
 
 void hyp::HypWindow::on_folder_open(){
- 
- std::cout<<"Opening Folder : ";
-    std::string x;
-    {
-        auto dialog = Gtk::FileChooserNative::create("Select a folder",*this,Gtk::FILE_CHOOSER_ACTION_SELECT_FOLDER,"Open","Cancel");
-        dialog->run();
-        std::cout<<dialog->get_filename()<<std::endl;
-        x=dialog->get_filename();
-    }
+    std::string x = select_folder();
+    if (x==""){
+        
+    }else{
     Gtk::TreeModel::Row row = *(m_refTreeModel->append());
+
+    // the fast method 
+    Glib::Thread::create(sigc::bind(sigc::mem_fun(*this,&hyp::HypWindow::set_dir),x,row,std::to_string(m_row)),false);
     
-    set_dir(x,row,std::to_string(m_row));
+    // the slow method
+    // set_dir(x,row,std::to_string(m_row));
+    
     m_row++;
     middle_window.set_position(250);
+    show_all();
+    }
+
 }
 
 //############################################################################### 
@@ -343,21 +367,26 @@ void hyp::HypWindow::set_dir(std::string fold,Gtk::TreeModel::Row &row,std::stri
     row[m_Columns.m_col_name] = std::filesystem::path(fold).filename().string();
     x=x+":";
     int m_child=0;
+    
     for(auto const& dir_entry: std::filesystem::directory_iterator{std::filesystem::path(fold)}){
-        
 
         if (Glib::file_test(dir_entry.path().string(),Glib::FILE_TEST_IS_DIR)){
             // std::cout<<"found dir : "<<dir_entry.path().string()<<std::endl;
             Gtk::TreeModel::Row childrow = *(m_refTreeModel->append(row.children()));
-
+            show_all();
             set_dir(dir_entry.path().string(),childrow,x+std::to_string(m_child));
+
             m_child++;
         }else{
 
             Gtk::TreeModel::Row childrow = *(m_refTreeModel->append(row.children()));
+            show_all();
+
             // FILE TYPES 
             if (dir_entry.path().filename().extension().string() == ".cc" or dir_entry.path().filename().extension().string() == ".cpp" ){
                 childrow[m_Columns.m_col_pix] = Gdk::Pixbuf::create_from_file( (std::string(get_current_dir_name())+"/src/resource/cpp/cpp.svg"),24,24 );
+            }else if(dir_entry.path().filename().extension().string() == ".c"){
+                childrow[m_Columns.m_col_pix] = Gdk::Pixbuf::create_from_file( (std::string(get_current_dir_name())+"/src/resource/c/c.svg"),24,24 );
             }else if(dir_entry.path().filename().extension().string() == ".md"){
                 childrow[m_Columns.m_col_pix] = Gdk::Pixbuf::create_from_file( (std::string(get_current_dir_name())+"/src/resource/md/md.svg"),24,24 );
             }else if(dir_entry.path().filename().extension().string() == ".o"){
@@ -366,6 +395,8 @@ void hyp::HypWindow::set_dir(std::string fold,Gtk::TreeModel::Row &row,std::stri
                 childrow[m_Columns.m_col_pix] = Gdk::Pixbuf::create_from_file( (std::string(get_current_dir_name())+"/src/resource/xml/xml.svg"),24,24 );
             }else if(dir_entry.path().filename().extension().string() == ".py"){
                 childrow[m_Columns.m_col_pix] = Gdk::Pixbuf::create_from_file( (std::string(get_current_dir_name())+"/src/resource/python/python.svg"),24,24 );
+            }else if(dir_entry.path().filename().extension().string() == ".php"){
+                childrow[m_Columns.m_col_pix] = Gdk::Pixbuf::create_from_file( (std::string(get_current_dir_name())+"/src/resource/php/php.svg"),24,24 );
             }else if(dir_entry.path().filename().extension().string() == ".rb"){
                 childrow[m_Columns.m_col_pix] = Gdk::Pixbuf::create_from_file( (std::string(get_current_dir_name())+"/src/resource/ruby/ruby.svg"),22,22 );
             }else if(dir_entry.path().filename().extension().string() == ".js"){
@@ -377,52 +408,30 @@ void hyp::HypWindow::set_dir(std::string fold,Gtk::TreeModel::Row &row,std::stri
             }else{
                 childrow[m_Columns.m_col_pix] = Gdk::Pixbuf::create_from_file( (std::string(get_current_dir_name())+"/src/resource/text2.svg"),24,24 );
             }
+
             childrow[m_Columns.m_col_name] = dir_entry.path().filename().string();
             (*folders)[(x+std::to_string(m_child))] = dir_entry.path().string();
+            // for Debuging only:
             // std::cout<<(x+std::to_string(m_child))<<std::endl;
-            m_child++;
+            m_child++;    
         }
-
+        show_all();
     }
 }
+//############################################################################### 
+// THE Destructor:
+hyp::HypWindow::~HypWindow(){
+    std::cout<<"\x1b[32mHypWindow\x1b[0m ... Destructed"<<std::endl;
+}
 
-//////////////////////////////////
-
-hyp::HypWindow::~HypWindow(){}
-
+//############################################################################### 
 
 void hyp::HypWindow::on_menu_others(){
     std::cout << "A menu item was selected." << std::endl;
 }
 
+//############################################################################### 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-/////////////////////////////////
 void hyp::HypWindow::on_menu_choices(const Glib::ustring& parameter){
   //The radio action's state does not change automatically:
     m_refChoice->change_state(parameter);
@@ -434,7 +443,9 @@ void hyp::HypWindow::on_menu_choices(const Glib::ustring& parameter){
         message = "Choice b was selected.";
     std::cout << message << std::endl;
 }
-/////////////////////////////////////
+
+//############################################################################### 
+
 void hyp::HypWindow::on_menu_choices_other(int parameter){
     //The radio action's state does not change automatically:
     m_refChoiceOther->change_state(parameter);
@@ -462,3 +473,5 @@ void hyp::HypWindow::on_menu_toggle(){
 
     std::cout << message << std::endl;
 }
+
+//########################### Ok Enough For Now ############################################# 

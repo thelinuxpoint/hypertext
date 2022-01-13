@@ -28,6 +28,7 @@ namespace hyp{
 			// Gtk::ScrolledWindow for_tree;
 			std::set<int> tracker;
 			  //Tree model columns:
+
   			class ModelColumns : public Gtk::TreeModel::ColumnRecord{
   				public:
     				ModelColumns()
@@ -46,6 +47,8 @@ namespace hyp{
 			Gtk::TreeView *m_TreeView;
   			Glib::RefPtr<Gtk::TreeStore> m_refTreeModel;
   			Glib::RefPtr<Gtk::TreeSelection> m_tree_selector;
+  			
+
   			//#####################################################
   			int m_row = 0;
   			int m_child = 0;
@@ -53,6 +56,9 @@ namespace hyp{
   			std::map<std::string,std::string> *folders;
 
   			std::set<std::string> *selected;
+
+  			// Gtk::Statusbar status;
+
 
   			void on_tab_closed(int c,std::string);
 
@@ -65,6 +71,10 @@ namespace hyp{
   			bool on_row_select(const Glib::RefPtr<Gtk::TreeModel>& b, const Gtk::TreeModel::Path& c,bool a);
 			
 			void on_file_select(std::string file);
+
+			std::string select_folder();
+
+			void on_tree_click(const Gtk::TreeModel::iterator& iter, const Gtk::TreeModel::Path& path);
 
 		protected:
   			//Signal handlers:
