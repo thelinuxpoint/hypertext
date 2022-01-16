@@ -1,5 +1,5 @@
 #include <gtksourceviewmm.h>
-
+#include <filesystem>
 #include <gtkmm.h>
 #include <vector>
 #include <iostream>
@@ -13,6 +13,7 @@ namespace hyp{
 		public:
 			std::string file_name;
 			std::string path;
+			std::string file_type;
 			bool is_saved;
 			bool is_defined;
 			int id;
@@ -20,5 +21,7 @@ namespace hyp{
 			HypTextView(std::string name,std::string path,Gtk::Label *label,int id);
 
 			void on_buffer_changed(Gtk::Label *l);
+
+			void file_type_analyze(std::string);
 	};
 }

@@ -19,7 +19,8 @@ void hyp::HypTextApp::on_startup(){
 
   	//File|New sub menu:
   	// add_action("newfile",sigc::mem_fun(*this, &hyp::HypTextApp::on_menu_file_new_generic));
-
+ Gdk::RGBA black_backk;
+    black_backk.set("#171815");
   	add_action("newfoo",sigc::mem_fun(*this, &hyp::HypTextApp::on_menu_file_new_generic));
 
   	add_action("newgoo",sigc::mem_fun(*this, &hyp::HypTextApp::on_menu_file_new_generic));

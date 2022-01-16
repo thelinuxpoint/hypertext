@@ -1,10 +1,18 @@
-#include <gtkmm.h>
 #include <gtksourceviewmm.h>
+#include <gtkmm.h>
+#include <vector>
+#include <iostream>
+#include <functional>
 #include <set>
+#include <iterator>
+#include <filesystem>
+#include <map>
+#include <thread>
 #include <list>
 #include <unistd.h>
-
+//
 #include "../header/hyptextview.h"
+#include "../header/hypimgview.h"
 
 namespace hyp{
 	class HypWindow : public Gtk::ApplicationWindow {
@@ -14,8 +22,14 @@ namespace hyp{
 
   			Gtk::VBox grand_window;
 			Gtk::HPaned middle_window;
-			Gtk::HBox h,c;
+
+			Gtk::HBox toolbar;
 			Gtk::VBox tree;
+
+
+			Gtk::Label *file;
+			Gtk::Label *status;
+			
 
 			Gtk::Button x;
 			int count=0;
@@ -24,7 +38,9 @@ namespace hyp{
 			Gtk::TextView txt_v;
 			Gtk::ScrolledWindow sw;
 			std::vector<Gtk::ScrolledWindow> vec_scroll;
+
 			std::vector<hyp::HypTextView> vec_text;
+			
 			// Gtk::ScrolledWindow for_tree;
 			std::set<int> tracker;
 			  //Tree model columns:
@@ -47,25 +63,24 @@ namespace hyp{
 			Gtk::TreeView *m_TreeView;
   			Glib::RefPtr<Gtk::TreeStore> m_refTreeModel;
   			Glib::RefPtr<Gtk::TreeSelection> m_tree_selector;
-  			
 
+  			Glib::Thread *thr;
+			Gtk::ScrolledWindow *for_tree;
   			//#####################################################
   			int m_row = 0;
   			int m_child = 0;
-
+  			int thr_count = 0;
   			std::map<std::string,std::string> *folders;
 
   			std::set<std::string> *selected;
 
-  			// Gtk::Statusbar status;
-
-
+  			// 
   			void on_tab_closed(int c,std::string);
-
+  			// 
   			void on_file_open();
-
+  			// 
   			void on_folder_open();
-
+  			// 
   			void set_dir(std::string fold,Gtk::TreeModel::Row &row,std::string);
 
   			bool on_row_select(const Glib::RefPtr<Gtk::TreeModel>& b, const Gtk::TreeModel::Path& c,bool a);
@@ -75,6 +90,14 @@ namespace hyp{
 			std::string select_folder();
 
 			void on_tree_click(const Gtk::TreeModel::iterator& iter, const Gtk::TreeModel::Path& path);
+			
+			std::string file_type_analyze(std::string file);
+
+			void on_tab_change(Gtk::Widget* page, guint page_number);
+
+		void on_row_insert(const Gtk::TreeModel::Path& path,const Gtk::TreeModel::iterator& iter);
+
+
 
 		protected:
   			//Signal handlers:

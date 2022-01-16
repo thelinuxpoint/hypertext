@@ -20,7 +20,7 @@ cflags  += $(shell pkg-config --cflags gtksourceviewmm-3.0)
 
 
 main: $(cfiles) $(hfiles) $(ofiles)
-	@echo "Compiling Main HyperText v0.1.0"
+	@echo "Compiling Main HyperText@v0.1.0"
 	@g++ --std=c++20 -Wall  $(cflags) main.cc -o ./build/hyper_text  $(ofiles) $(libs) >> log 2>&1
 
 # object files
@@ -29,6 +29,11 @@ main: $(cfiles) $(hfiles) $(ofiles)
 ./build/hyptextview.o: ./src/component/hyptextview.cc ./src/header/hyptextview.h
 	@printf "Compiling hyptextview.cc ~> hyptextview.o"
 	@g++ --std=c++20 -c $(cflags) ./src/component/hyptextview.cc -o ./build/hyptextview.o >> log 2>&1
+	@echo " => [ok]"
+
+./build/hypimgview.o: ./src/component/hypimgview.cc ./src/header/hypimgview.h
+	@printf "Compiling hypimgview.cc ~> hypimgview.o"
+	@g++ --std=c++20 -c $(cflags) ./src/component/hypimgview.cc -o ./build/hypimgview.o >> log 2>&1
 	@echo " => [ok]"
 
 ./build/hypertextapp.o: ./src/component/hypertextapp.cc ./src/header/hypertextapp.h
