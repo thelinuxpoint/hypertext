@@ -6,17 +6,19 @@ temp    := $(cfiles:.cc=.o)
 ofiles  := $(addprefix ./build/, $(notdir $(temp)))
 
 libs    := $(shell pkg-config --libs gtkmm-3.0)
-libs    += $(shell pkg-config --libs glib-2.0)
-libs    += $(shell pkg-config --libs gio-2.0) 
+libs    += $(shell pkg-config --libs glibmm-2.4)
+libs    += $(shell pkg-config --libs giomm-2.4) 
 libs    += $(shell pkg-config --libs gtksourceviewmm-3.0) 
 
 
 cflags  := $(shell pkg-config --cflags gtkmm-3.0)
-cflags  += $(shell pkg-config --cflags glib-2.0)
-cflags  += $(shell pkg-config --cflags gio-2.0)
+cflags  += $(shell pkg-config --cflags glibmm-2.4)
+cflags  += $(shell pkg-config --cflags giomm-2.4)
 cflags  += $(shell pkg-config --cflags gtksourceviewmm-3.0)
 
 ######################################################
+# libgtkmm-3.0-dev
+# libgtksourceviewmm-3.0-dev
 
 
 main: $(cfiles) $(hfiles) $(ofiles)
