@@ -7,12 +7,14 @@ hyp::HypTextView::HypTextView(std::string name,std::string path,Gtk::Label *labe
 	this->file_name = name;
 	this->path = path;
 	this->id = id;
-Gdk::RGBA grey;
-    grey.set("#282828");
+	Gdk::RGBA grey;
+    grey.set("#181920");
 
     override_background_color(grey);
+	set_show_line_marks();
+	set_indent_on_tab();
+	set_indent_width(4);
 
-	
 
 	if(this->path!=""){
 		Glib::RefPtr<Gsv::Language> lang;
@@ -35,12 +37,12 @@ Gdk::RGBA grey;
 	file_type_analyze(name);
 	set_accepts_tab(true);
 	set_indent(4);
-	this->buffer->signal_changed().connect(sigc::bind(sigc::mem_fun(*this,&hyp::HypTextView::on_buffer_changed),label));
+	buffer->signal_changed().connect(sigc::bind(sigc::mem_fun(*this,&hyp::HypTextView::on_buffer_changed),label));
 }
 
 void hyp::HypTextView::on_buffer_changed(Gtk::Label *l){
 	std::cout<<"changed"<<std::flush<<std::endl;
-	l->set_label(this->file_name+" * ");
+	l->set_label(this->file_name+" *");
 
 }
 void hyp::HypTextView::file_type_analyze(std::string file){

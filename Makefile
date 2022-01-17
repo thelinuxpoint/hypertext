@@ -31,6 +31,11 @@ main: $(cfiles) $(hfiles) $(ofiles)
 	@g++ --std=c++20 -c $(cflags) ./src/component/hyptextview.cc -o ./build/hyptextview.o >> log 2>&1
 	@echo " => [ok]"
 
+./build/hypworker.o: ./src/component/hypworker.cc ./src/header/hypworker.h
+	@printf "Compiling hypworker.cc ~> hypworker.o"
+	@g++ --std=c++20 -c $(cflags) ./src/component/hypworker.cc -o ./build/hypworker.o >> log 2>&1
+	@echo " => [ok]"
+
 ./build/hypimgview.o: ./src/component/hypimgview.cc ./src/header/hypimgview.h
 	@printf "Compiling hypimgview.cc ~> hypimgview.o"
 	@g++ --std=c++20 -c $(cflags) ./src/component/hypimgview.cc -o ./build/hypimgview.o >> log 2>&1

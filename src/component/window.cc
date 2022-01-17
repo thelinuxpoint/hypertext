@@ -58,6 +58,7 @@ hyp::HypWindow::HypWindow(): Gtk::ApplicationWindow(), m_Box(Gtk::ORIENTATION_VE
     folders = new std::map<std::string,std::string>();
     selected = new std::set<std::string>();
     
+    hyp_dispatch.connect(sigc::mem_fun(*this,&hyp::HypWindow::on_thread_call));
 
     cell_pix->set_property("pixbuf-expander-open", Gdk::Pixbuf::create_from_file( (std::string(get_current_dir_name())+"/src/resource/open0.svg")));
     cell_pix->set_property("pixbuf-expander-closed", Gdk::Pixbuf::create_from_file( (std::string(get_current_dir_name())+"/src/resource/close0.svg")));
@@ -72,7 +73,8 @@ hyp::HypWindow::HypWindow(): Gtk::ApplicationWindow(), m_Box(Gtk::ORIENTATION_VE
 
 
     m_TreeView->signal_row_expanded().connect( sigc::mem_fun(*this,&hyp::HypWindow::on_tree_click));
-    m_TreeView->signal_row_collapsed().connect( sigc::mem_fun(*this,&hyp::HypWindow::on_tree_click));    
+    m_TreeView->signal_row_collapsed().connect( sigc::mem_fun(*this,&hyp::HypWindow::on_tree_click));  
+
     m_TreeView->set_vexpand();
     m_TreeView->set_enable_tree_lines( true);
 
@@ -304,30 +306,37 @@ bool hyp::HypWindow::on_row_select(const Glib::RefPtr<Gtk::TreeModel>& b,const G
 // columns are overlapping and i cant find solution for it
 // so we will deal with it ... later on ...
 void hyp::HypWindow::on_tree_click(const Gtk::TreeModel::iterator& iter, const Gtk::TreeModel::Path& path){
+    m_TreeView->set_sensitive(false);
     m_TreeView->set_vexpand();
     for_tree->check_resize();
     m_TreeView->columns_autosize();
+    m_TreeView->set_sensitive(true);
     m_TreeView->show_all();
 
 }
 
 void hyp::HypWindow::on_row_insert(const Gtk::TreeModel::Path& path,const Gtk::TreeModel::iterator& iter){
-
     show_all();
-
 }
-
-
-
 //###############################################################################
-std::string hyp::HypWindow::select_folder(){
-    std::cout<<"Opening Folder : ";
-    std::string x;
-    auto dialog = Gtk::FileChooserNative::create("Select a folder",*this,Gtk::FILE_CHOOSER_ACTION_SELECT_FOLDER,"Open","Cancel");
-    dialog->run();
-    std::cout<<dialog->get_filename()<<std::endl;
-    return dialog->get_filename();
+
+void hyp::HypWindow::on_thread_call(){
+    
+    sleep(0.5);
+
+    if(thr and thr->joinable()){
+        thr->join();
+        status->set_label("Done");
+    }
+    // for_tree->set_sensitive(true);
+    // m_TreeView->set_sensitive(true);
+    thr = nullptr;
 }
+//###############################################################################
+void hyp::HypWindow::notify(){
+    hyp_dispatch.emit();
+}
+
 
 //############################################################################### 
 /* the function come in action when the "Open Folder" is clicked and
@@ -335,14 +344,23 @@ std::string hyp::HypWindow::select_folder(){
  *
  */
 void hyp::HypWindow::on_folder_open(){
-    std::string x = select_folder();
+
+    std::cout<<"Opening Folder : ";
+    auto dialog = Gtk::FileChooserNative::create("Select a folder",*this,Gtk::FILE_CHOOSER_ACTION_SELECT_FOLDER,"Open","Cancel");
+    dialog->run();
+    std::cout<<dialog->get_filename()<<std::endl;
+    std::string x = dialog->get_filename();
+
     if (x==""){
         
     }else{
         Gtk::TreeModel::Row row = *(m_refTreeModel->append());
-        status->set_label(std::string("Folder ~ ")+x);
+        status->set_label(std::string("Adding Folder - ")+x);
     
-        // the fast method and errorfull method
+        // the fast method and errorfull method    
+        // for_tree->set_sensitive(false);
+        // m_TreeView->set_sensitive(false);
+
         thr = Glib::Thread::create(sigc::bind(sigc::mem_fun(*this,&hyp::HypWindow::set_dir),x,row,std::to_string(m_row)));
 
         
@@ -367,6 +385,8 @@ void hyp::HypWindow::set_dir(std::string fold,Gtk::TreeModel::Row &row,std::stri
     row[m_Columns.m_col_name] = std::filesystem::path(fold).filename().string();
     x=x+":";
     int m_child=0;
+    ++thr_count;
+
     for(auto const& dir_entry: std::filesystem::directory_iterator{std::filesystem::path(fold)}){
 
         if (Glib::file_test(dir_entry.path().string(),Glib::FILE_TEST_IS_DIR)){
@@ -385,7 +405,6 @@ void hyp::HypWindow::set_dir(std::string fold,Gtk::TreeModel::Row &row,std::stri
             // FILE TYPES 
             if (dir_entry.path().filename().extension().string() == ".cc" or dir_entry.path().filename().extension().string() == ".cpp" ){
                 childrow[m_Columns.m_col_pix] = Gdk::Pixbuf::create_from_file( (std::string(get_current_dir_name())+"/src/resource/cpp/cpp.svg"),24,24 );
-
             }else if(dir_entry.path().filename().extension().string() == ".c"){
                 childrow[m_Columns.m_col_pix] = Gdk::Pixbuf::create_from_file( (std::string(get_current_dir_name())+"/src/resource/c/c.svg"),24,24 );
             }else if(dir_entry.path().filename().extension().string() == ".md"){
@@ -418,6 +437,8 @@ void hyp::HypWindow::set_dir(std::string fold,Gtk::TreeModel::Row &row,std::stri
 
         }
     }
+    --thr_count;
+    if(thr_count==0){ notify();}
     for_tree->show_all();
 
 }
@@ -478,7 +499,7 @@ void hyp::HypWindow::on_tab_change(Gtk::Widget* page, guint page_number){
 //############################################################################### 
 // THE Destructor:
 hyp::HypWindow::~HypWindow(){
-    std::cout<<"\x1b[34mHypWindow\x1b[0m ... Destructed"<<std::endl;
+    std::cout<<"\x1b[36mHypWindow\x1b[0m ... Destructed"<<std::endl;
 }
 
 //############################################################################### 
