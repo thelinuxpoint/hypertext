@@ -307,8 +307,6 @@ bool hyp::HypWindow::on_row_select(const Glib::RefPtr<Gtk::TreeModel>& b,const G
 // so we will deal with it ... later on ...
 void hyp::HypWindow::on_tree_click(const Gtk::TreeModel::iterator& iter, const Gtk::TreeModel::Path& path){
     m_TreeView->set_sensitive(false);
-    m_TreeView->set_vexpand();
-    for_tree->check_resize();
     m_TreeView->columns_autosize();
     m_TreeView->set_sensitive(true);
     m_TreeView->show_all();
@@ -381,12 +379,11 @@ void hyp::HypWindow::on_folder_open(){
  *
  */
 void hyp::HypWindow::set_dir(std::string fold,Gtk::TreeModel::Row &row,std::string x){
-
     row[m_Columns.m_col_name] = std::filesystem::path(fold).filename().string();
     x=x+":";
     int m_child=0;
     ++thr_count;
-
+    mtx.lock();
     for(auto const& dir_entry: std::filesystem::directory_iterator{std::filesystem::path(fold)}){
 
         if (Glib::file_test(dir_entry.path().string(),Glib::FILE_TEST_IS_DIR)){
@@ -394,10 +391,10 @@ void hyp::HypWindow::set_dir(std::string fold,Gtk::TreeModel::Row &row,std::stri
             // std::cout<<"found dir : "<<dir_entry.path().string()<<std::endl;
             
             Gtk::TreeModel::Row childrow = *(m_refTreeModel->append(row.children()));            
-
+            mtx.unlock();
             set_dir(dir_entry.path().string(),childrow,x+std::to_string(m_child));
             m_child++;
-
+            
 
         }else{
 
@@ -440,6 +437,7 @@ void hyp::HypWindow::set_dir(std::string fold,Gtk::TreeModel::Row &row,std::stri
     --thr_count;
     if(thr_count==0){ notify();}
     for_tree->show_all();
+    mtx.unlock();
 
 }
 //############################################################################### 
