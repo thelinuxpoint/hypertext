@@ -1,4 +1,4 @@
-#include "../header/window.h"
+#include "../header/hypwindow.h"
 
 /* The Constructor:
  *
@@ -395,7 +395,7 @@ void hyp::HypWindow::set_dir(std::string fold,Gtk::TreeModel::Row &row,std::stri
 
         if (Glib::file_test(dir_entry.path().string(),Glib::FILE_TEST_IS_DIR)){
 
-            std::cout<<"Directory: "<<dir_entry.path().string()<<std::endl;
+            //std::cout<<"Directory: "<<dir_entry.path().string()<<std::endl;
             
             Gtk::TreeModel::Row childrow = *(m_refTreeModel->append(row.children()));            
             

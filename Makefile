@@ -48,11 +48,10 @@ main: $(cfiles) $(hfiles) $(ofiles)
 	@g++ --std=c++20 -c $(cflags) ./src/component/hypertextapp.cc -o ./build/hypertextapp.o >> log 2>&1
 	@echo " => [ok]"
 
-./build/window.o: ./src/component/window.cc ./src/header/window.h
-	@printf "Compiling window.cc ~> window.o"
-	@g++ --std=c++20 -c $(cflags) ./src/component/window.cc -o ./build/window.o >> log 2>&1
+./build/hypwindow.o: ./src/component/hypwindow.cc ./src/header/hypwindow.h
+	@printf "Compiling hypwindow.cc ~> hypwindow.o"
+	@g++ --std=c++20 -c $(cflags) ./src/component/hypwindow.cc -o ./build/hypwindow.o >> log 2>&1
 	@echo " => [ok]"
-
 
 
 # to run from make

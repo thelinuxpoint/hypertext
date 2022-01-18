@@ -1,5 +1,5 @@
 #include "../header/hypertextapp.h"
-#include "../header/window.h"
+#include "../header/hypwindow.h"
 #include <iostream>
 
 hyp::HypTextApp::HypTextApp(): Gtk::Application("org.gtkmm.example.main_menu"){
