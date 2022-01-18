@@ -13,6 +13,8 @@
 //
 #include "../header/hyptextview.h"
 #include "../header/hypimgview.h"
+#include "../header/hypworker.h"
+
 
 namespace hyp{
 	class HypWindow : public Gtk::ApplicationWindow {
@@ -61,7 +63,7 @@ namespace hyp{
     				Gtk::TreeModelColumn<Glib::RefPtr<Gdk::Pixbuf>> m_col_pix;
   			};
   			// 
-  			ModelColumns m_Columns;
+  			ModelColumns *m_Columns;
 
   			Gtk::TreeViewColumn *hpy_column;
 			Gtk::CellRendererPixbuf *cell_pix;
@@ -79,11 +81,15 @@ namespace hyp{
 
 			// Gtk::ScrolledWindow for_tree;
 			Gtk::ScrolledWindow *for_tree;
+
+
   			//#####################################################
 
   			std::map<std::string,std::string> *folders;
 
   			std::set<std::string> *selected;
+
+
 
   			/* Class Methods which are Public:
 			 *

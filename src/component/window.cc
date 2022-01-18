@@ -37,8 +37,10 @@ hyp::HypWindow::HypWindow(): Gtk::ApplicationWindow(), m_Box(Gtk::ORIENTATION_VE
 
     for_tree = new Gtk::ScrolledWindow();
 
+    m_Columns = new ModelColumns();
 
-    m_refTreeModel = Gtk::TreeStore::create(m_Columns);
+
+    m_refTreeModel = Gtk::TreeStore::create(*m_Columns);
 
     m_TreeView = Gtk::manage(new Gtk::TreeView (m_refTreeModel));
     
@@ -51,9 +53,9 @@ hyp::HypWindow::HypWindow(): Gtk::ApplicationWindow(), m_Box(Gtk::ORIENTATION_VE
     
     m_refTreeModel->signal_row_inserted().connect( sigc::mem_fun(*this,&hyp::HypWindow::on_row_insert));
 
-    hpy_column = new Gtk::TreeViewColumn();
-    cell_pix = new Gtk::CellRendererPixbuf();
-    cell_txt = new Gtk::CellRendererText();
+    hpy_column = Gtk::manage(new Gtk::TreeViewColumn());
+    cell_pix = Gtk::manage(new Gtk::CellRendererPixbuf());
+    cell_txt = Gtk::manage(new Gtk::CellRendererText());
 
     folders = new std::map<std::string,std::string>();
     selected = new std::set<std::string>();
@@ -84,7 +86,7 @@ hyp::HypWindow::HypWindow(): Gtk::ApplicationWindow(), m_Box(Gtk::ORIENTATION_VE
     // nb.append_page(hyp::HypImgView("/home/prakash/bitmap.png"));
     
     int x = m_TreeView->append_column(*hpy_column);
-    m_TreeView->get_column(x-1)->add_attribute(*cell_pix,"stock-id",m_Columns.m_col_name);
+    m_TreeView->get_column(x-1)->add_attribute(*cell_pix,"stock-id",m_Columns->m_col_name);
 
     nb.override_background_color(black_backk);
     nb.signal_switch_page().connect( sigc::mem_fun(*this,&hyp::HypWindow::on_tab_change));
@@ -110,6 +112,8 @@ hyp::HypWindow::HypWindow(): Gtk::ApplicationWindow(), m_Box(Gtk::ORIENTATION_VE
     add_action("openfile", sigc::mem_fun(*this, &hyp::HypWindow::on_file_open));
     
     add_action("newfile", sigc::mem_fun(*this, &hyp::HypWindow::insert_tab));
+
+
     //###########################################################################
 
     //Choices menus, to demonstrate Radio items,
@@ -323,7 +327,7 @@ void hyp::HypWindow::on_row_insert(const Gtk::TreeModel::Path& path,const Gtk::T
 
 void hyp::HypWindow::on_thread_call(){
     
-    sleep(0.5);
+   
 
     if(thr and thr->joinable()){
         thr->join();
@@ -331,7 +335,7 @@ void hyp::HypWindow::on_thread_call(){
     }
     
     // m_TreeView->set_sensitive(true);
-    thr = nullptr;
+    // thr = nullptr;
 }
 //###############################################################################
 void hyp::HypWindow::notify(){
@@ -382,7 +386,7 @@ void hyp::HypWindow::on_folder_open(){
  *
  */
 void hyp::HypWindow::set_dir(std::string fold,Gtk::TreeModel::Row &row,std::string x){
-    row[m_Columns.m_col_name] = std::filesystem::path(fold).filename().string();
+    row[m_Columns->m_col_name] = std::filesystem::path(fold).filename().string();
     x=x+":";
     int m_child=0;
     ++thr_count;
@@ -391,7 +395,7 @@ void hyp::HypWindow::set_dir(std::string fold,Gtk::TreeModel::Row &row,std::stri
 
         if (Glib::file_test(dir_entry.path().string(),Glib::FILE_TEST_IS_DIR)){
 
-            // std::cout<<"found dir : "<<dir_entry.path().string()<<std::endl;
+            std::cout<<"Directory: "<<dir_entry.path().string()<<std::endl;
             
             Gtk::TreeModel::Row childrow = *(m_refTreeModel->append(row.children()));            
             
@@ -404,32 +408,32 @@ void hyp::HypWindow::set_dir(std::string fold,Gtk::TreeModel::Row &row,std::stri
             Gtk::TreeModel::Row childrow = *(m_refTreeModel->append(row.children()));
             // FILE TYPES 
             if (dir_entry.path().filename().extension().string() == ".cc" or dir_entry.path().filename().extension().string() == ".cpp" ){
-                childrow[m_Columns.m_col_pix] = Gdk::Pixbuf::create_from_file( (std::string(get_current_dir_name())+"/src/resource/cpp/cpp.svg"),24,24 );
+                childrow[m_Columns->m_col_pix] = Gdk::Pixbuf::create_from_file( (std::string(get_current_dir_name())+"/src/resource/cpp/cpp.svg"),24,24 );
             }else if(dir_entry.path().filename().extension().string() == ".c"){
-                childrow[m_Columns.m_col_pix] = Gdk::Pixbuf::create_from_file( (std::string(get_current_dir_name())+"/src/resource/c/c.svg"),24,24 );
+                childrow[m_Columns->m_col_pix] = Gdk::Pixbuf::create_from_file( (std::string(get_current_dir_name())+"/src/resource/c/c.svg"),24,24 );
             }else if(dir_entry.path().filename().extension().string() == ".md"){
-                childrow[m_Columns.m_col_pix] = Gdk::Pixbuf::create_from_file( (std::string(get_current_dir_name())+"/src/resource/md/md.svg"),24,24 );
+                childrow[m_Columns->m_col_pix] = Gdk::Pixbuf::create_from_file( (std::string(get_current_dir_name())+"/src/resource/md/md.svg"),24,24 );
             }else if(dir_entry.path().filename().extension().string() == ".o"){
-                childrow[m_Columns.m_col_pix] = Gdk::Pixbuf::create_from_file( (std::string(get_current_dir_name())+"/src/resource/exe.svg"),24,24 );
+                childrow[m_Columns->m_col_pix] = Gdk::Pixbuf::create_from_file( (std::string(get_current_dir_name())+"/src/resource/exe.svg"),24,24 );
             }else if(dir_entry.path().filename().extension().string() == ".svg"){
-                childrow[m_Columns.m_col_pix] = Gdk::Pixbuf::create_from_file( (std::string(get_current_dir_name())+"/src/resource/xml/xml.svg"),24,24 );
+                childrow[m_Columns->m_col_pix] = Gdk::Pixbuf::create_from_file( (std::string(get_current_dir_name())+"/src/resource/xml/xml.svg"),24,24 );
             }else if(dir_entry.path().filename().extension().string() == ".py"){
-                childrow[m_Columns.m_col_pix] = Gdk::Pixbuf::create_from_file( (std::string(get_current_dir_name())+"/src/resource/python/python.svg"),24,24 );
+                childrow[m_Columns->m_col_pix] = Gdk::Pixbuf::create_from_file( (std::string(get_current_dir_name())+"/src/resource/python/python.svg"),24,24 );
             }else if(dir_entry.path().filename().extension().string() == ".php"){
-                childrow[m_Columns.m_col_pix] = Gdk::Pixbuf::create_from_file( (std::string(get_current_dir_name())+"/src/resource/php/php.svg"),24,24 );
+                childrow[m_Columns->m_col_pix] = Gdk::Pixbuf::create_from_file( (std::string(get_current_dir_name())+"/src/resource/php/php.svg"),24,24 );
             }else if(dir_entry.path().filename().extension().string() == ".rb"){
-                childrow[m_Columns.m_col_pix] = Gdk::Pixbuf::create_from_file( (std::string(get_current_dir_name())+"/src/resource/ruby/ruby.svg"),22,22 );
+                childrow[m_Columns->m_col_pix] = Gdk::Pixbuf::create_from_file( (std::string(get_current_dir_name())+"/src/resource/ruby/ruby.svg"),22,22 );
             }else if(dir_entry.path().filename().extension().string() == ".js"){
-                childrow[m_Columns.m_col_pix] = Gdk::Pixbuf::create_from_file( (std::string(get_current_dir_name())+"/src/resource/js/js.svg"),24,24 );
+                childrow[m_Columns->m_col_pix] = Gdk::Pixbuf::create_from_file( (std::string(get_current_dir_name())+"/src/resource/js/js.svg"),24,24 );
             }else if(dir_entry.path().filename().extension().string() == ".css"){
-                childrow[m_Columns.m_col_pix] = Gdk::Pixbuf::create_from_file( (std::string(get_current_dir_name())+"/src/resource/css3/css3.svg"),24,24 );
+                childrow[m_Columns->m_col_pix] = Gdk::Pixbuf::create_from_file( (std::string(get_current_dir_name())+"/src/resource/css3/css3.svg"),24,24 );
             }else if(dir_entry.path().filename().extension().string() == ".json"){
-                childrow[m_Columns.m_col_pix] = Gdk::Pixbuf::create_from_file( (std::string(get_current_dir_name())+"/src/resource/json/json.svg"),24,24 );
+                childrow[m_Columns->m_col_pix] = Gdk::Pixbuf::create_from_file( (std::string(get_current_dir_name())+"/src/resource/json/json.svg"),24,24 );
             }else{
-                childrow[m_Columns.m_col_pix] = Gdk::Pixbuf::create_from_file( (std::string(get_current_dir_name())+"/src/resource/text2.svg"),24,24 );
+                childrow[m_Columns->m_col_pix] = Gdk::Pixbuf::create_from_file( (std::string(get_current_dir_name())+"/src/resource/text2.svg"),24,24 );
             }
 
-            childrow[m_Columns.m_col_name] = dir_entry.path().filename().string();
+            childrow[m_Columns->m_col_name] = dir_entry.path().filename().string();
             (*folders)[(x+std::to_string(m_child))] = dir_entry.path().string();
             // for Debuging only:
             // std::cout<<(x+std::to_string(m_child))<<std::endl;
