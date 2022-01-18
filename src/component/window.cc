@@ -70,12 +70,14 @@ hyp::HypWindow::HypWindow(): Gtk::ApplicationWindow(), m_Box(Gtk::ORIENTATION_VE
     hpy_column->add_attribute(*cell_pix,"pixbuf", 1);
     hpy_column->set_reorderable();
     hpy_column->set_title(" Folders");
+    // hpy_column->set_resizable();
 
 
     m_TreeView->signal_row_expanded().connect( sigc::mem_fun(*this,&hyp::HypWindow::on_tree_click));
     m_TreeView->signal_row_collapsed().connect( sigc::mem_fun(*this,&hyp::HypWindow::on_tree_click));  
 
     m_TreeView->set_vexpand();
+    // m_TreeView->set_visible(false);
     m_TreeView->set_enable_tree_lines( true);
 
     // hyp::HypImgView("/home/prakash/bitmap.png");
@@ -306,9 +308,10 @@ bool hyp::HypWindow::on_row_select(const Glib::RefPtr<Gtk::TreeModel>& b,const G
 // columns are overlapping and i cant find solution for it
 // so we will deal with it ... later on ...
 void hyp::HypWindow::on_tree_click(const Gtk::TreeModel::iterator& iter, const Gtk::TreeModel::Path& path){
-    m_TreeView->set_sensitive(false);
+    
     m_TreeView->columns_autosize();
-    m_TreeView->set_sensitive(true);
+    for_tree->queue_resize();
+    m_TreeView->queue_resize();
     m_TreeView->show_all();
 
 }
@@ -326,7 +329,7 @@ void hyp::HypWindow::on_thread_call(){
         thr->join();
         status->set_label("Done");
     }
-    // for_tree->set_sensitive(true);
+    
     // m_TreeView->set_sensitive(true);
     thr = nullptr;
 }
@@ -383,7 +386,7 @@ void hyp::HypWindow::set_dir(std::string fold,Gtk::TreeModel::Row &row,std::stri
     x=x+":";
     int m_child=0;
     ++thr_count;
-    mtx.lock();
+    
     for(auto const& dir_entry: std::filesystem::directory_iterator{std::filesystem::path(fold)}){
 
         if (Glib::file_test(dir_entry.path().string(),Glib::FILE_TEST_IS_DIR)){
@@ -391,7 +394,7 @@ void hyp::HypWindow::set_dir(std::string fold,Gtk::TreeModel::Row &row,std::stri
             // std::cout<<"found dir : "<<dir_entry.path().string()<<std::endl;
             
             Gtk::TreeModel::Row childrow = *(m_refTreeModel->append(row.children()));            
-            mtx.unlock();
+            
             set_dir(dir_entry.path().string(),childrow,x+std::to_string(m_child));
             m_child++;
             
@@ -436,8 +439,9 @@ void hyp::HypWindow::set_dir(std::string fold,Gtk::TreeModel::Row &row,std::stri
     }
     --thr_count;
     if(thr_count==0){ notify();}
-    for_tree->show_all();
-    mtx.unlock();
+    for_tree->show_all();    
+
+    
 
 }
 //############################################################################### 
