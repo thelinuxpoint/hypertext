@@ -44,12 +44,21 @@ namespace hyp{
   			
   			int thr_count = 0;
 			
+			int icount = 0;
 			Gtk::Notebook nb;
 			
 			std::vector<Gtk::ScrolledWindow> vec_scroll;
 
 			std::vector<hyp::HypTextView> vec_text;
-			
+
+			std::vector<hyp::HypImgView> vec_imge;
+
+  			std::map<int,std::string> *types;
+
+			std::map<int,int> *text_track;
+  			
+  			std::map<int,int> *img_track;
+
 			std::set<int> tracker;
 
 			//Tree model columns:

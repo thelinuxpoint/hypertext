@@ -59,7 +59,10 @@ hyp::HypWindow::HypWindow(): Gtk::ApplicationWindow(), m_Box(Gtk::ORIENTATION_VE
 
     folders = new std::map<std::string,std::string>();
     selected = new std::set<std::string>();
-    
+    types = new std::map<int,std::string>();
+    text_track = new std::map<int,int>();
+    img_track = new std::map<int,int>();
+
     hyp_dispatch.connect(sigc::mem_fun(*this,&hyp::HypWindow::on_thread_call));
 
     cell_pix->set_property("pixbuf-expander-open", Gdk::Pixbuf::create_from_file( (std::string(get_current_dir_name())+"/src/resource/open0.svg")));
@@ -262,21 +265,10 @@ void hyp::HypWindow::on_file_select(std::string file){
     std::cout<<"------------------------"<<std::endl;
 
 
-    Gtk::Label *d = new Gtk::Label(std::filesystem::path(file).filename().string());
-    vec_text.push_back(hyp::HypTextView(std::filesystem::path(file).filename(),file,d,count));
+    Gtk::Box *box = Gtk::manage(new Gtk::Box());
+    Gtk::Label *d = Gtk::manage(new Gtk::Label(std::filesystem::path(file).filename().string()));
+    Gtk::Button *but = Gtk::manage(new Gtk::Button());
     vec_scroll.push_back(Gtk::ScrolledWindow());
-    // (vec_text[count].buffer)->set_text(Glib::file_get_contents(file));
-    // (vec_text[count].buffer)->set_modified();
-
-    vec_scroll[count].add(vec_text[count]);
-    //
-    Gtk::Box *box = new Gtk::Box();
-    Gtk::Button *but = new Gtk::Button();
-
-    but->signal_clicked().connect( sigc::bind(sigc::mem_fun(*this,&hyp::HypWindow::on_tab_closed),count,vec_text[count].path));
-    vec_text[count].set_show_line_numbers(true);
-    vec_text[count].set_monospace(true);
-    
 
     but->set_image_from_icon_name("window-close");
     but->set_relief(Gtk::RELIEF_NONE);
@@ -284,7 +276,35 @@ void hyp::HypWindow::on_file_select(std::string file){
     box->pack_end(*but,false,false,0);
     box->show_all();
 
-    nb.append_page(vec_scroll[count],*box);
+    if(std::filesystem::path(file).filename().extension().string()==".png" or std::filesystem::path(file).filename().extension().string()==".jpg"){
+        
+        vec_imge.push_back(hyp::HypImgView(std::filesystem::path(file).filename(),file,count));        
+        but->signal_clicked().connect( sigc::bind(sigc::mem_fun(*this,&hyp::HypWindow::on_tab_closed),count,vec_imge[icount].path));
+        vec_scroll[count].add(vec_imge[icount]);
+
+        nb.append_page(vec_scroll[count],*box);
+        (*types)[count]="image";
+        (*img_track)[count]=icount;
+        icount+=1;
+
+    }else{
+
+        vec_text.push_back(hyp::HypTextView(std::filesystem::path(file).filename(),file,d,count));
+        vec_scroll[count].add(vec_text[count-icount]);
+        vec_text[count-icount].set_show_line_numbers(true);
+        vec_text[count-icount].set_monospace(true);
+        but->signal_clicked().connect( sigc::bind(sigc::mem_fun(*this,&hyp::HypWindow::on_tab_closed),count,vec_text[count-icount].path));
+        // nb.append_page(vec_scroll[count-icount],*box);
+        nb.append_page(vec_scroll[count],*box); 
+        (*text_track)[count]=(count-icount);
+
+        (*types)[count]="text";
+
+
+    }
+    
+    // (vec_text[count].buffer)->set_text(Glib::file_get_contents(file));
+    // (vec_text[count].buffer)->set_modified();
 
     tracker.insert(count);
     count+=1;
@@ -432,9 +452,10 @@ void hyp::HypWindow::set_dir(std::string fold,Gtk::TreeModel::Row &row,std::stri
             }else{
                 childrow[m_Columns->m_col_pix] = Gdk::Pixbuf::create_from_file( (std::string(get_current_dir_name())+"/src/resource/text2.svg"),24,24 );
             }
-
+            mtx.lock();
             childrow[m_Columns->m_col_name] = dir_entry.path().filename().string();
             (*folders)[(x+std::to_string(m_child))] = dir_entry.path().string();
+            mtx.unlock();
             // for Debuging only:
             // std::cout<<(x+std::to_string(m_child))<<std::endl;
             m_child++;        
@@ -498,7 +519,12 @@ void hyp::HypWindow::on_tab_change(Gtk::Widget* page, guint page_number){
         }
     }
     if(nb.get_current_page()==page_number){
-        file->set_label(vec_text[value].file_type);
+        if((*types)[value]=="image"){
+            file->set_label(vec_imge[(*img_track)[value]].file_type);
+
+        }else{
+            file->set_label(vec_text[(*text_track)[value]].file_type);
+        }
     }
 }
 
