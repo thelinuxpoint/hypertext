@@ -9,7 +9,15 @@ hyp::HypTextView::HypTextView(std::string name,std::string path,Gtk::Label *labe
 	this->id = id;
 	Gdk::RGBA grey;
     grey.set("#181920");
+    
+    Glib::RefPtr<Gsv::StyleSchemeManager> style = Gsv::StyleSchemeManager::create();
+	style->append_search_path("/usr/share/gtksourceview-3.0/styles/Kali-Dark.xml");    
+	auto vec_x = style->get_scheme_ids();
 
+	// for (std::vector<std::string>::iterator i = vec_x.begin(); i != vec_x.end(); ++i)
+	// {
+	// 	std::cout<<*i<<std::endl;
+	// }
     override_background_color(grey);
 	set_show_line_marks();
 	set_indent_on_tab();
@@ -29,11 +37,16 @@ hyp::HypTextView::HypTextView(std::string name,std::string path,Gtk::Label *labe
 
    		lang = x->guess_language(this->file_name, content_type);
    		Glib::RefPtr<Gsv::Buffer> buffer = Gsv::Buffer::create(lang);
+   		
+   		buffer->set_style_scheme(style->get_scheme(vec_x[2]));
+
     	buffer->set_text(Glib::file_get_contents(this->path));
     	set_source_buffer(buffer);
 
 	}   
 
+	// std::cout<<get_name()<<std::endl;
+	
 	file_type_analyze(name);
 	set_accepts_tab(true);
 	set_indent(4);

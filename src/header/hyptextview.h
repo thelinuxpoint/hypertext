@@ -19,7 +19,7 @@ namespace hyp{
 			int id;
 			Glib::RefPtr<Gtk::TextBuffer> buffer = get_buffer();
 			HypTextView(std::string name,std::string path,Gtk::Label *label,int id);
-
+			
 			void on_buffer_changed(Gtk::Label *l);
 
 			void file_type_analyze(std::string);

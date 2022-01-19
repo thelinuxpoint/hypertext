@@ -14,7 +14,7 @@ hyp::HypWindow::HypWindow(): Gtk::ApplicationWindow(), m_Box(Gtk::ORIENTATION_VE
     Gdk::RGBA black_backk;
     black_backk.set("#151515");
     override_background_color(black_backk);
-    set_default_icon(Gdk::Pixbuf::create_from_file( (std::string(get_current_dir_name())+"/src/resource/hypertext.png")));
+    set_default_icon(Gdk::Pixbuf::create_from_file( (std::string(get_current_dir_name())+"/src/resource/512.png"),511,511));
     
     Gdk::Color c;
     c.set_rgb(24,25,21);
@@ -96,7 +96,7 @@ hyp::HypWindow::HypWindow(): Gtk::ApplicationWindow(), m_Box(Gtk::ORIENTATION_VE
     // ADD #####################################################################
     // treeview to scrollbar
     for_tree->add(*m_TreeView);
-    
+    for_tree->set_vexpand();
     //scrollbar to vbox
     // tree.add(*for_tree);
     //vbox to middle window
@@ -276,7 +276,7 @@ void hyp::HypWindow::on_file_select(std::string file){
     box->pack_end(*but,false,false,0);
     box->show_all();
 
-    if(std::filesystem::path(file).filename().extension().string()==".png" or std::filesystem::path(file).filename().extension().string()==".jpg"){
+    if(std::filesystem::path(file).filename().extension().string()==".png" or std::filesystem::path(file).filename().extension().string()==".jpg" or std::filesystem::path(file).filename().extension().string()==".jpeg"  or std::filesystem::path(file).filename().extension().string()==".gif"){
         
         vec_imge.push_back(hyp::HypImgView(std::filesystem::path(file).filename(),file,count));        
         but->signal_clicked().connect( sigc::bind(sigc::mem_fun(*this,&hyp::HypWindow::on_tab_closed),count,vec_imge[icount].path));
