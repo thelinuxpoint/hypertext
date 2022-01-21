@@ -15,6 +15,8 @@ void hyp::HypImgView::file_type_analyze(std::string file){
 		this->file_type="JPG";
 	}else if(std::filesystem::path(file).extension().string()==".jpeg"){
 		this->file_type="JPEG";
+	}else if(std::filesystem::path(file).extension().string()==".gif"){
+		this->file_type="GIF";
 	}else{
 		this->file_type="None";
 	}

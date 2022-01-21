@@ -93,7 +93,9 @@ hyp::HypWindow::HypWindow(): Gtk::ApplicationWindow(), m_Box(Gtk::ORIENTATION_VE
 
     nb.override_background_color(black_backk);
     nb.signal_switch_page().connect( sigc::mem_fun(*this,&hyp::HypWindow::on_tab_change));
+    //##########################################################################    
     // ADD #####################################################################
+
     // treeview to scrollbar
     for_tree->add(*m_TreeView);
     for_tree->set_vexpand();
@@ -105,10 +107,11 @@ hyp::HypWindow::HypWindow(): Gtk::ApplicationWindow(), m_Box(Gtk::ORIENTATION_VE
     middle_window.add2(nb);
 
     middle_window.set_position(0);
-    //##########################################################################
 
+    //##########################################################################
     // Edit menu ################################################################
-    add_action("copy", sigc::mem_fun(*this, &hyp::HypWindow::on_menu_others));
+
+    // add_action("copy", sigc::mem_fun(*this, &hyp::HypWindow::on_menu_others));
 
     add_action("openfolder", sigc::mem_fun(*this, &hyp::HypWindow::on_folder_open));
 
@@ -116,18 +119,16 @@ hyp::HypWindow::HypWindow(): Gtk::ApplicationWindow(), m_Box(Gtk::ORIENTATION_VE
     
     add_action("newfile", sigc::mem_fun(*this, &hyp::HypWindow::insert_tab));
 
+    add_action("save", sigc::mem_fun(*this, &hyp::HypWindow::on_save));
+
 
     //###########################################################################
 
     //Choices menus, to demonstrate Radio items,
     //using our convenience methods for string and int radio values:
-    m_refChoice = add_action_radio_string("choice",sigc::mem_fun(*this, &hyp::HypWindow::on_menu_choices), "a");
-
-    m_refChoiceOther = add_action_radio_integer("choiceother",sigc::mem_fun(*this, &hyp::HypWindow::on_menu_choices_other), 1);
-
     m_refToggle = add_action_bool("sometoggle",sigc::mem_fun(*this, &hyp::HypWindow::on_menu_toggle), false);
     //Help menu:
-    add_action("about", sigc::mem_fun(*this, &hyp::HypWindow::on_menu_others));
+    // add_action("about", sigc::mem_fun(*this, &hyp::HypWindow::on_menu_others));
     
     //##########################################################################
     //Create the toolbar and add it to a container widget:
@@ -158,7 +159,11 @@ hyp::HypWindow::HypWindow(): Gtk::ApplicationWindow(), m_Box(Gtk::ORIENTATION_VE
 }
 
 //###############################################################################
-
+/*
+ *
+ *
+ *
+ */ 
 void hyp::HypWindow::insert_tab(){
 
     std::cout<<"Inserting Tab -> Empty"<<std::endl;
@@ -191,7 +196,11 @@ void hyp::HypWindow::insert_tab(){
 }
 
 //###############################################################################
-
+/*
+ *
+ *
+ *
+ */ 
 void hyp::HypWindow::on_tab_closed(int c,std::string path){
     std::cout<<"Closing Tab : ";
     auto itrs = tracker.begin();
@@ -210,10 +219,10 @@ void hyp::HypWindow::on_tab_closed(int c,std::string path){
 
 //###############################################################################
 /*
-
-
-
-*/ 
+ *
+ *
+ *
+ */ 
 void hyp::HypWindow::on_file_open(){
     
     std::cout<<"------------------------"<<std::endl;
@@ -226,7 +235,7 @@ void hyp::HypWindow::on_file_open(){
     std::cout<<"------------------------"<<std::endl;
 
 
-    Gtk::Label *d = new Gtk::Label(std::filesystem::path(dialog->get_filename()).filename().string());
+    Gtk::Label *d = Gtk::manage(new Gtk::Label(std::filesystem::path(dialog->get_filename()).filename().string()));
     vec_text.push_back(hyp::HypTextView(std::filesystem::path(dialog->get_filename()).filename(),dialog->get_filename(),d,count));
     vec_scroll.push_back(Gtk::ScrolledWindow());
     // (vec_text[count].buffer)->set_text(Glib::file_get_contents(dialog->get_filename()));
@@ -257,6 +266,10 @@ void hyp::HypWindow::on_file_open(){
 
 }
 //###############################################################################
+/* activates when the tree column is clicked
+ *
+ *
+ */ 
 void hyp::HypWindow::on_file_select(std::string file){
     std::cout<<"------------------------"<<std::endl;
     std::cout<<"Inserting Tab from Sidebar -> Filled "<<std::endl;
@@ -299,8 +312,6 @@ void hyp::HypWindow::on_file_select(std::string file){
         (*text_track)[count]=(count-icount);
 
         (*types)[count]="text";
-
-
     }
     
     // (vec_text[count].buffer)->set_text(Glib::file_get_contents(file));
@@ -362,9 +373,35 @@ void hyp::HypWindow::notify(){
     hyp_dispatch.emit();
 }
 
+//###############################################################################
+/*
+ *
+ *
+ *
+ */ 
+void hyp::HypWindow::on_save(){
+    // std::cout<<nb.get_current_page()<<std::endl;
+    auto itrs = tracker.begin();
+    // auto itre = tracker.find(page_number);
+    auto value=0;
 
+    for (std::set<int>::iterator i = tracker.begin(); i != tracker.end(); ++i){
+        if(std::distance(itrs,i)==nb.get_current_page()){
+            value = *i;
+            break;
+        }
+    }
+    if ((*types)[value] != "image"){
+        std::cout<<"Saving ~> "<<vec_text[(*text_track)[value]].path<<std::endl;
+        Glib::file_set_contents(vec_text[(*text_track)[value]].path,vec_text[(*text_track)[value]].get_buffer()->get_text());
+        vec_text[(*text_track)[value]].l->set_label(vec_text[(*text_track)[value]].file_name);
+        // vec_text[(*text_track)[value]].get_buffer().get_text();
+
+    }
+
+}
 //############################################################################### 
-/* the function come in action when the "Open Folder" is clicked and
+/* the function come in action when the "Open Folder" is clicked 
  *
  *
  */
@@ -449,6 +486,8 @@ void hyp::HypWindow::set_dir(std::string fold,Gtk::TreeModel::Row &row,std::stri
                 childrow[m_Columns->m_col_pix] = Gdk::Pixbuf::create_from_file( (std::string(get_current_dir_name())+"/src/resource/css3/css3.svg"),24,24 );
             }else if(dir_entry.path().filename().extension().string() == ".json"){
                 childrow[m_Columns->m_col_pix] = Gdk::Pixbuf::create_from_file( (std::string(get_current_dir_name())+"/src/resource/json/json.svg"),24,24 );
+            }else if(dir_entry.path().filename().extension().string() == ".jpg" or dir_entry.path().filename().extension().string() == ".png" or dir_entry.path().filename().extension().string() == ".jpeg"){
+                childrow[m_Columns->m_col_pix] = Gdk::Pixbuf::create_from_file( (std::string(get_current_dir_name())+"/src/resource/drawing.svg"),24,24 );
             }else{
                 childrow[m_Columns->m_col_pix] = Gdk::Pixbuf::create_from_file( (std::string(get_current_dir_name())+"/src/resource/text2.svg"),24,24 );
             }
@@ -459,7 +498,6 @@ void hyp::HypWindow::set_dir(std::string fold,Gtk::TreeModel::Row &row,std::stri
             // for Debuging only:
             // std::cout<<(x+std::to_string(m_child))<<std::endl;
             m_child++;        
-
         }
     }
     --thr_count;
@@ -497,6 +535,14 @@ std::string hyp::HypWindow::file_type_analyze(std::string file){
         return std::string("HTML");
     }else if(std::filesystem::path(file).extension().string()==".json"){
         return std::string("JSON");
+    }else if(std::filesystem::path(file).extension().string()==".png"){
+        return std::string("PNG");
+    }else if(std::filesystem::path(file).extension().string()==".jpg"){
+        return std::string("JPG");
+    }else if(std::filesystem::path(file).extension().string()==".jpeg"){
+        return std::string("JPEG");
+    }else if(std::filesystem::path(file).extension().string()==".gif"){
+        return std::string("GIF");
     }else if(std::filesystem::path(file).filename().string()=="Makefile" or std::filesystem::path(file).filename().string()=="MAKEFILE" ){
         return std::string("Makefile");
     }
@@ -528,6 +574,7 @@ void hyp::HypWindow::on_tab_change(Gtk::Widget* page, guint page_number){
     }
 }
 
+
 //############################################################################### 
 // THE Destructor:
 hyp::HypWindow::~HypWindow(){
@@ -535,38 +582,6 @@ hyp::HypWindow::~HypWindow(){
 }
 
 //############################################################################### 
-
-void hyp::HypWindow::on_menu_others(){
-    std::cout << "A menu item was selected." << std::endl;
-}
-
-//############################################################################### 
-
-void hyp::HypWindow::on_menu_choices(const Glib::ustring& parameter){
-  //The radio action's state does not change automatically:
-    m_refChoice->change_state(parameter);
-
-    Glib::ustring message;
-    if (parameter == "a")
-        message = "Choice a was selected.";
-    else
-        message = "Choice b was selected.";
-    std::cout << message << std::endl;
-}
-
-//############################################################################### 
-
-void hyp::HypWindow::on_menu_choices_other(int parameter){
-    //The radio action's state does not change automatically:
-    m_refChoiceOther->change_state(parameter);
-
-    Glib::ustring message;
-    if (parameter == 1)
-        message = "Choice 1 was selected.";
-    else
-        message = "Choice 2 was selected.";
-    std::cout << message << std::endl;
-}
 
 void hyp::HypWindow::on_menu_toggle(){
     bool active = false;

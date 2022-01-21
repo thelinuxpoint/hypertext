@@ -116,8 +116,12 @@ namespace hyp{
 		protected:
 
   			//Signal handlers:
+			void on_save();
+
   			void on_menu_others();
 
+			void on_new_window();
+			
   			void on_menu_choices(const Glib::ustring& parameter);
 
   			void on_menu_choices_other(int parameter);

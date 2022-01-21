@@ -10,6 +10,7 @@ namespace hyp{
   			void on_menu_file_new_generic();
   			void on_menu_file_quit();
   			void on_menu_help_about();
+  			void on_new_window();
 
   			Glib::RefPtr<Gtk::Builder> m_refBuilder;
 

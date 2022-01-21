@@ -31,6 +31,11 @@ void hyp::HypTextApp::on_startup(){
   	//Help menu:
   	add_action("about", sigc::mem_fun(*this, &hyp::HypTextApp::on_menu_help_about));
 
+    add_action("newwindow", sigc::mem_fun(*this, &hyp::HypTextApp::on_new_window));
+
+    
+
+
   	m_refBuilder = Gtk::Builder::create();
 
   	//Layout the actions in a menubar and an application menu:
@@ -58,6 +63,7 @@ void hyp::HypTextApp::on_startup(){
     "        <item>"
     "          <attribute name='label' translatable='yes'>Save</attribute>"
     "          <attribute name='action'>win.save</attribute>"
+    "          <attribute name='accel'>&lt;Primary&gt;s</attribute>"
     "        </item>"
     "        <item>"
     "          <attribute name='label' translatable='yes'>Save _As</attribute>"
@@ -65,7 +71,7 @@ void hyp::HypTextApp::on_startup(){
     "        </item>"
     "        <item>"
     "          <attribute name='label' translatable='yes'>New _Window</attribute>"
-    "          <attribute name='action'>win.newwindow</attribute>"
+    "          <attribute name='action'>app.newwindow</attribute>"
     "        </item>"
     "      </section>"
     "      <section>"
@@ -161,6 +167,23 @@ void hyp::HypTextApp::create_window(){
   	win->signal_hide().connect(sigc::bind<Gtk::Window*>(sigc::mem_fun(*this, &hyp::HypTextApp::on_window_hide), win));
   	win->show_all();
 }
+
+void hyp::HypTextApp::on_new_window(){
+    auto win = new hyp::HypWindow();
+
+    //Make sure that the application runs for as long this window is still open:
+    add_window(*win);
+
+    //Delete the window when it is hidden.
+    //That's enough for this simple example.
+    win->signal_hide().connect(sigc::bind<Gtk::Window*>(sigc::mem_fun(*this, &hyp::HypTextApp::on_window_hide), win));
+    win->show_all();
+
+
+}
+
+
+
 
 void hyp::HypTextApp::on_window_hide(Gtk::Window* window){
   	delete window;
