@@ -68,6 +68,8 @@ void hyp::HypTextApp::on_startup(){
     "        <item>"
     "          <attribute name='label' translatable='yes'>Save _As</attribute>"
     "          <attribute name='action'>win.saveas</attribute>"
+    "          <attribute name='accel'>&lt;ctrl&gt;&lt;shift&gt;s</attribute>"
+
     "        </item>"
     "        <item>"
     "          <attribute name='label' translatable='yes'>New _Window</attribute>"

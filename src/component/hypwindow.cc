@@ -121,6 +121,8 @@ hyp::HypWindow::HypWindow(): Gtk::ApplicationWindow(), m_Box(Gtk::ORIENTATION_VE
 
     add_action("save", sigc::mem_fun(*this, &hyp::HypWindow::on_save));
 
+    add_action("saveas", sigc::mem_fun(*this, &hyp::HypWindow::on_save_as));
+
 
     //###########################################################################
 
@@ -167,27 +169,32 @@ hyp::HypWindow::HypWindow(): Gtk::ApplicationWindow(), m_Box(Gtk::ORIENTATION_VE
 void hyp::HypWindow::insert_tab(){
 
     std::cout<<"Inserting Tab -> Empty"<<std::endl;
-    Gtk::Label *d = new Gtk::Label("untitled");
-    vec_text.push_back(hyp::HypTextView("untitled","",d,count));
 
+    Gtk::Box *box = Gtk::manage(new Gtk::Box());
+    Gtk::Label *d = Gtk::manage(new Gtk::Label("untitled"));
+    Gtk::Button *but = Gtk::manage(new Gtk::Button());
     vec_scroll.push_back(Gtk::ScrolledWindow());
-    vec_scroll[count].add(vec_text[count]);
-    //
-    Gtk::Box *box = new Gtk::Box();
-    Gtk::Button *but = new Gtk::Button();
-
-    but->signal_clicked().connect( sigc::bind(sigc::mem_fun(*this,&hyp::HypWindow::on_tab_closed),count,vec_text[count].path));
-    vec_text[count].set_show_line_numbers(true);
-    vec_text[count].set_monospace(true);
-    
 
     but->set_image_from_icon_name("window-close");
     but->set_relief(Gtk::RELIEF_NONE);
     box->pack_start(*d,true,true,2);
     box->pack_end(*but,false,false,0);
     box->show_all();
+   
+    vec_text.push_back(hyp::HypTextView("untitled","",d,count));
+    but->signal_clicked().connect( sigc::bind(sigc::mem_fun(*this,&hyp::HypWindow::on_tab_closed),count,vec_text[count].path));
 
-    nb.append_page(vec_scroll[count],*box);
+    vec_scroll[count].add(vec_text[count-icount]);
+
+    vec_text[count-icount].set_show_line_numbers(true);
+    vec_text[count-icount].set_monospace(true);
+
+    but->signal_clicked().connect( sigc::bind(sigc::mem_fun(*this,&hyp::HypWindow::on_tab_closed),count,vec_text[count-icount].path));
+    // nb.append_page(vec_scroll[count-icount],*box);
+    nb.append_page(vec_scroll[count],*box); 
+    (*text_track)[count]=(count-icount);
+    (*types)[count]="text";
+    
 
     tracker.insert(count);
     count+=1;
@@ -234,22 +241,12 @@ void hyp::HypWindow::on_file_open(){
     std::cout<<dialog->get_filename()<<std::endl;
     std::cout<<"------------------------"<<std::endl;
 
+    std::string file = dialog->get_filename();
 
-    Gtk::Label *d = Gtk::manage(new Gtk::Label(std::filesystem::path(dialog->get_filename()).filename().string()));
-    vec_text.push_back(hyp::HypTextView(std::filesystem::path(dialog->get_filename()).filename(),dialog->get_filename(),d,count));
+    Gtk::Box *box = Gtk::manage(new Gtk::Box());
+    Gtk::Label *d = Gtk::manage(new Gtk::Label(std::filesystem::path(file).filename().string()));
+    Gtk::Button *but = Gtk::manage(new Gtk::Button());
     vec_scroll.push_back(Gtk::ScrolledWindow());
-    // (vec_text[count].buffer)->set_text(Glib::file_get_contents(dialog->get_filename()));
-
-
-    vec_scroll[count].add(vec_text[count]);
-    //
-    Gtk::Box *box = new Gtk::Box();
-    Gtk::Button *but = new Gtk::Button();
-
-    but->signal_clicked().connect( sigc::bind(sigc::mem_fun(*this,&hyp::HypWindow::on_tab_closed),count,vec_text[count].path));
-    vec_text[count].set_show_line_numbers(true);
-    vec_text[count].set_monospace(true);
-    
 
     but->set_image_from_icon_name("window-close");
     but->set_relief(Gtk::RELIEF_NONE);
@@ -257,13 +254,39 @@ void hyp::HypWindow::on_file_open(){
     box->pack_end(*but,false,false,0);
     box->show_all();
 
-    nb.append_page(vec_scroll[count],*box);
+    if(std::filesystem::path(file).filename().extension().string()==".png" or std::filesystem::path(file).filename().extension().string()==".jpg" or std::filesystem::path(file).filename().extension().string()==".jpeg"  or std::filesystem::path(file).filename().extension().string()==".gif"){
+        
+        vec_imge.push_back(hyp::HypImgView(std::filesystem::path(file).filename(),file,count));        
+        but->signal_clicked().connect( sigc::bind(sigc::mem_fun(*this,&hyp::HypWindow::on_tab_closed),count,vec_imge[icount].path));
+        vec_scroll[count].add(vec_imge[icount]);
+
+        nb.append_page(vec_scroll[count],*box);
+        (*types)[count]="image";
+        (*img_track)[count]=icount;
+        icount+=1;
+
+    }else{
+
+        vec_text.push_back(hyp::HypTextView(std::filesystem::path(file).filename(),file,d,count));
+        vec_scroll[count].add(vec_text[count-icount]);
+        vec_text[count-icount].set_show_line_numbers(true);
+        vec_text[count-icount].set_monospace(true);
+        but->signal_clicked().connect( sigc::bind(sigc::mem_fun(*this,&hyp::HypWindow::on_tab_closed),count,vec_text[count-icount].path));
+        // nb.append_page(vec_scroll[count-icount],*box);
+        nb.append_page(vec_scroll[count],*box); 
+        (*text_track)[count]=(count-icount);
+
+        (*types)[count]="text";
+    }
+    
+    // (vec_text[count].buffer)->set_text(Glib::file_get_contents(file));
+    // (vec_text[count].buffer)->set_modified();
 
     tracker.insert(count);
     count+=1;
 
     show_all();
-
+    
 }
 //###############################################################################
 /* activates when the tree column is clicked
@@ -380,9 +403,8 @@ void hyp::HypWindow::notify(){
  *
  */ 
 void hyp::HypWindow::on_save(){
-    // std::cout<<nb.get_current_page()<<std::endl;
+
     auto itrs = tracker.begin();
-    // auto itre = tracker.find(page_number);
     auto value=0;
 
     for (std::set<int>::iterator i = tracker.begin(); i != tracker.end(); ++i){
@@ -392,14 +414,78 @@ void hyp::HypWindow::on_save(){
         }
     }
     if ((*types)[value] != "image"){
-        std::cout<<"Saving ~> "<<vec_text[(*text_track)[value]].path<<std::endl;
-        Glib::file_set_contents(vec_text[(*text_track)[value]].path,vec_text[(*text_track)[value]].get_buffer()->get_text());
-        vec_text[(*text_track)[value]].l->set_label(vec_text[(*text_track)[value]].file_name);
-        // vec_text[(*text_track)[value]].get_buffer().get_text();
+        if (vec_text[(*text_track)[value]].path == ""){
+
+        start:
+
+            auto dialog = Gtk::FileChooserNative::create("Save New File",*this,Gtk::FILE_CHOOSER_ACTION_SAVE,"Save","Cancel");
+            dialog->run();
+
+            if (dialog->get_filename() == ""){ goto end; }
+
+            if(Glib::file_test(dialog->get_filename(), Glib::FileTest::FILE_TEST_EXISTS)){
+                Gtk::MessageDialog dialog(*this, "File Already Exists");
+                dialog.set_secondary_text("The file name you entered is currently present in the directory.");
+                dialog.run();
+                goto start;
+            }
+            vec_text[(*text_track)[value]].path = dialog->get_filename();
+            vec_text[(*text_track)[value]].file_name = std::filesystem::path(dialog->get_filename()).filename().string();
+        end:
+            std::cout<<"";
+        }
+        if(vec_text[(*text_track)[value]].path != ""){
+            std::cout<<"Saving ~> "<<vec_text[(*text_track)[value]].path<<std::endl;
+            Glib::file_set_contents(vec_text[(*text_track)[value]].path,vec_text[(*text_track)[value]].get_buffer()->get_text());
+            vec_text[(*text_track)[value]].l->set_label(vec_text[(*text_track)[value]].file_name);
+        }
+        
 
     }
 
 }
+//###############################################################################
+/*
+ *
+ *
+ *
+ */ 
+void hyp::HypWindow::on_save_as(){
+
+    start:
+
+    auto dialog = Gtk::FileChooserNative::create("Save As",*this,Gtk::FILE_CHOOSER_ACTION_SAVE,"Save","Cancel");
+    dialog->run();
+    if (dialog->get_filename() == ""){ goto end; }
+
+    if(Glib::file_test(dialog->get_filename(), Glib::FileTest::FILE_TEST_EXISTS)){
+        Gtk::MessageDialog dialog(*this, "File Already Exists");
+        dialog.set_secondary_text("The file name you entered is currently present in the directory.");
+        dialog.run();
+    }else{
+        auto itrs = tracker.begin();
+        auto value=0;
+
+        for (std::set<int>::iterator i = tracker.begin(); i != tracker.end(); ++i){
+            if(std::distance(itrs,i)==nb.get_current_page()){
+                value = *i;
+                break;
+            }
+        }
+        if ((*types)[value] != "image"){
+            vec_text[(*text_track)[value]].path = dialog->get_filename();
+            vec_text[(*text_track)[value]].file_name = std::filesystem::path(dialog->get_filename()).filename().string();
+
+            std::cout<<"Saving as ~> "<<vec_text[(*text_track)[value]].path<<std::endl;
+            Glib::file_set_contents(vec_text[(*text_track)[value]].path,vec_text[(*text_track)[value]].get_buffer()->get_text());
+            vec_text[(*text_track)[value]].l->set_label(vec_text[(*text_track)[value]].file_name);
+        }
+
+    }
+    end:
+        std::cout<<"";
+}
+
 //############################################################################### 
 /* the function come in action when the "Open Folder" is clicked 
  *

@@ -118,6 +118,8 @@ namespace hyp{
   			//Signal handlers:
 			void on_save();
 
+			void on_save_as();
+
   			void on_menu_others();
 
 			void on_new_window();
