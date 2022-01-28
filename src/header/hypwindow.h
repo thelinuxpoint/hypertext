@@ -101,11 +101,6 @@ namespace hyp{
 
 			void on_thread_call();
 
-			void notify();
-			
-			std::mutex mtx;
-
-
   			//Signal handlers:
 			void on_save();
 
@@ -133,12 +128,8 @@ namespace hyp{
   			void on_file_open();
   			// 
   			void on_folder_open();
-
-  			bool on_row_select(const Glib::RefPtr<Gtk::TreeModel>& b, const Gtk::TreeModel::Path& c,bool a);
 			
 			void on_file_select(std::string file);
-
-			void on_tree_click(const Gtk::TreeModel::iterator& iter, const Gtk::TreeModel::Path& path);
 
   			//Child widgets:
   			Glib::RefPtr<Gtk::Builder> m_refBuilder;

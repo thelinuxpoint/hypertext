@@ -43,6 +43,7 @@ namespace hyp{
   			Glib::RefPtr<Gtk::TreeStore> m_refTreeModel;
   			Glib::RefPtr<Gtk::TreeSelection> m_tree_selector;
 
+	Glib::RefPtr<Gtk::TreeModelSort> sorted_model;
 
   			std::map<std::string,std::string> *folders;
 

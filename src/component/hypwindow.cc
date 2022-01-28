@@ -330,38 +330,7 @@ void hyp::HypWindow::on_file_select(std::string file){
     
 }
 //###############################################################################
-// bool hyp::HypWindow::on_row_select(const Glib::RefPtr<Gtk::TreeModel>& b,const Gtk::TreeModel::Path& c,bool a){
-//     // for Debuging only:
-//     // std::cout<<"Selected ... "<<std::flush<<c.to_string()<<std::endl;
-//     show_all();
-//     if(std::filesystem::is_regular_file((*folders)[c.to_string()]) and (selected->count((*folders)[c.to_string()]) == 0) ){
-//         on_file_select((*folders)[c.to_string()]);
 
-//         file->set_label(file_type_analyze(std::filesystem::path((*folders)[c.to_string()]).filename().string()));
-        
-//         selected->insert((*folders)[c.to_string()]);
-//         return false;
-//     }
-//     return false;
-// }
-
-//############################################################################### 
-// columns are overlapping and i cant find solution for it
-// so we will deal with it ... later on ...
-// void hyp::HypWindow::on_tree_click(const Gtk::TreeModel::iterator& iter, const Gtk::TreeModel::Path& path){
-    
-//     m_TreeView->columns_autosize();
-//     for_tree->show_all();
-//     for_tree->check_resize();
-//     m_TreeView->check_resize();
-
-// }
-
-// void hyp::HypWindow::on_row_insert(const Gtk::TreeModel::Path& path,const Gtk::TreeModel::iterator& iter){
-    
-    
-// }
-//###############################################################################
 
 void hyp::HypWindow::on_thread_call(){
 
@@ -369,10 +338,6 @@ void hyp::HypWindow::on_thread_call(){
         thr->join();
         status->set_label("Done");
     }
-}
-//###############################################################################
-void hyp::HypWindow::notify(){
-    hyp_dispatch.emit();
 }
 
 //###############################################################################
@@ -519,7 +484,7 @@ void hyp::HypWindow::on_tab_change(Gtk::Widget* page, guint page_number){
 //############################################################################### 
 // THE Destructor:
 hyp::HypWindow::~HypWindow(){
-    std::cout<<"\x1b[36mHypWindow\x1b[0m ... Destructed"<<std::endl;
+    std::cout<<"\x1b[37mHyperText \x1b[35mQuit\x1b[0m ... Bye !"<<std::endl;
 }
 
 //############################################################################### 
