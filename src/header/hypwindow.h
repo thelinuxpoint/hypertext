@@ -1,6 +1,8 @@
 #include <gtksourceviewmm.h>
 #include <gtkmm.h>
 #include <vector>
+#pragma once
+
 #include <iostream>
 #include <functional>
 #include <set>
@@ -10,21 +12,26 @@
 #include <thread>
 #include <list>
 #include <unistd.h>
-//
 #include "../header/hyptextview.h"
 #include "../header/hypimgview.h"
 #include "../header/hypworker.h"
+#include "../header/hyptreeview.h"
+
 
 
 namespace hyp{
+
 	class HypWindow : public Gtk::ApplicationWindow {
 		public:
   			HypWindow();
+
   			virtual ~HypWindow();
 
   			Gtk::VBox grand_window;
 
 			Gtk::HPaned middle_window;
+
+			Gtk::VPaned v_window;
 
 			Gtk::HBox toolbar;
 
@@ -45,8 +52,9 @@ namespace hyp{
   			int thr_count = 0;
 			
 			int icount = 0;
-			Gtk::Notebook nb;
 			
+			Gtk::Notebook nb;
+
 			std::vector<Gtk::ScrolledWindow> vec_scroll;
 
 			std::vector<hyp::HypTextView> vec_text;
@@ -61,35 +69,19 @@ namespace hyp{
 
 			std::set<int> tracker;
 
-			//Tree model columns:
-  			class ModelColumns : public Gtk::TreeModel::ColumnRecord{
-  				public:
-    				ModelColumns(){ 	
-    					add(m_col_name); 
-    					add(m_col_pix);
-    				}
-    				Gtk::TreeModelColumn<Glib::ustring> m_col_name;
-    				Gtk::TreeModelColumn<Glib::RefPtr<Gdk::Pixbuf>> m_col_pix;
-  			};
-  			// 
-  			ModelColumns *m_Columns;
-
-  			Gtk::TreeViewColumn *hpy_column;
-			Gtk::CellRendererPixbuf *cell_pix;
-			Gtk::CellRendererText *cell_txt;
-
-			Gtk::TreeView *m_TreeView;
-  			Glib::RefPtr<Gtk::TreeStore> m_refTreeModel;
-  			Glib::RefPtr<Gtk::TreeSelection> m_tree_selector;
-
+			hyp::HypTreeView *treeView;
 
   			//
-  			Glib::Thread *thr;
+  			std::thread *thr;
   			// 
   			Glib::Dispatcher hyp_dispatch;
 
 			// Gtk::ScrolledWindow for_tree;
 			Gtk::ScrolledWindow *for_tree;
+
+			Gtk::ScrolledWindow *for_shell;
+
+
 
 
   			//#####################################################
@@ -113,7 +105,6 @@ namespace hyp{
 			
 			std::mutex mtx;
 
-		protected:
 
   			//Signal handlers:
 			void on_save();
@@ -150,16 +141,13 @@ namespace hyp{
 			void on_tree_click(const Gtk::TreeModel::iterator& iter, const Gtk::TreeModel::Path& path);
 
   			//Child widgets:
-  			Gtk::Box m_Box;
   			Glib::RefPtr<Gtk::Builder> m_refBuilder;
-
   			//Two sets of choices:
   			Glib::RefPtr<Gio::SimpleAction> m_refChoice;
-
+  			//
   			Glib::RefPtr<Gio::SimpleAction> m_refChoiceOther;
-
+  			//
   			Glib::RefPtr<Gio::SimpleAction> m_refToggle;
-
 	};
 
 }

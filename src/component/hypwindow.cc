@@ -6,7 +6,7 @@
  *
  *
  */ 
-hyp::HypWindow::HypWindow(): Gtk::ApplicationWindow(), m_Box(Gtk::ORIENTATION_VERTICAL){
+hyp::HypWindow::HypWindow(): Gtk::ApplicationWindow(){
     
     set_title("Hyper Text");
     set_default_size(900, 600);
@@ -14,7 +14,6 @@ hyp::HypWindow::HypWindow(): Gtk::ApplicationWindow(), m_Box(Gtk::ORIENTATION_VE
     Gdk::RGBA black_backk;
     black_backk.set("#151515");
     override_background_color(black_backk);
-    set_default_icon(Gdk::Pixbuf::create_from_file( (std::string(get_current_dir_name())+"/src/resource/512.png"),511,511));
     
     Gdk::Color c;
     c.set_rgb(24,25,21);
@@ -35,27 +34,9 @@ hyp::HypWindow::HypWindow(): Gtk::ApplicationWindow(), m_Box(Gtk::ORIENTATION_VE
     auto ctx = grand_window.get_style_context();
     ctx->add_provider_for_screen(screen, css, GTK_STYLE_PROVIDER_PRIORITY_APPLICATION);
 
-    for_tree = new Gtk::ScrolledWindow();
+    for_tree = Gtk::manage(new Gtk::ScrolledWindow());
 
-    m_Columns = new ModelColumns();
-
-
-    m_refTreeModel = Gtk::TreeStore::create(*m_Columns);
-
-    m_TreeView = Gtk::manage(new Gtk::TreeView (m_refTreeModel));
     
-    m_TreeView->set_model(m_refTreeModel);
- 
-    m_TreeView->override_background_color(black_backk);
-
-    m_tree_selector = m_TreeView->get_selection();
-    m_tree_selector->set_select_function(sigc::mem_fun(*this, &hyp::HypWindow::on_row_select));
-    
-    m_refTreeModel->signal_row_inserted().connect( sigc::mem_fun(*this,&hyp::HypWindow::on_row_insert));
-
-    hpy_column = Gtk::manage(new Gtk::TreeViewColumn());
-    cell_pix = Gtk::manage(new Gtk::CellRendererPixbuf());
-    cell_txt = Gtk::manage(new Gtk::CellRendererText());
 
     folders = new std::map<std::string,std::string>();
     selected = new std::set<std::string>();
@@ -65,47 +46,43 @@ hyp::HypWindow::HypWindow(): Gtk::ApplicationWindow(), m_Box(Gtk::ORIENTATION_VE
 
     hyp_dispatch.connect(sigc::mem_fun(*this,&hyp::HypWindow::on_thread_call));
 
-    cell_pix->set_property("pixbuf-expander-open", Gdk::Pixbuf::create_from_file( (std::string(get_current_dir_name())+"/src/resource/open0.svg")));
-    cell_pix->set_property("pixbuf-expander-closed", Gdk::Pixbuf::create_from_file( (std::string(get_current_dir_name())+"/src/resource/close0.svg")));
-    cell_pix->set_padding(3,1);
-    
-    hpy_column->pack_start(*cell_pix,false);
-    hpy_column->pack_start(*cell_txt, true);
-    hpy_column->add_attribute(*cell_txt,"text", 0);
-    hpy_column->add_attribute(*cell_pix,"pixbuf", 1);
-    hpy_column->set_reorderable();
-    hpy_column->set_title(" Folders");
-    // hpy_column->set_resizable();
 
 
-    m_TreeView->signal_row_expanded().connect( sigc::mem_fun(*this,&hyp::HypWindow::on_tree_click));
-    m_TreeView->signal_row_collapsed().connect( sigc::mem_fun(*this,&hyp::HypWindow::on_tree_click));  
+    treeView = Gtk::manage(new hyp::HypTreeView(this));
 
-    m_TreeView->set_vexpand();
-    // m_TreeView->set_visible(false);
-    m_TreeView->set_enable_tree_lines( true);
-
-    // hyp::HypImgView("/home/prakash/bitmap.png");
-    // nb.append_page(hyp::HypImgView("/home/prakash/bitmap.png"));
-    
-    int x = m_TreeView->append_column(*hpy_column);
-    m_TreeView->get_column(x-1)->add_attribute(*cell_pix,"stock-id",m_Columns->m_col_name);
+    // m_TreeView->signal_row_expanded().connect( sigc::mem_fun(*this,&hyp::HypWindow::on_tree_click));
+    // m_TreeView->signal_row_collapsed().connect( sigc::mem_fun(*this,&hyp::HypWindow::on_tree_click));  
 
     nb.override_background_color(black_backk);
     nb.signal_switch_page().connect( sigc::mem_fun(*this,&hyp::HypWindow::on_tab_change));
+    // nb.
     //##########################################################################    
     // ADD #####################################################################
 
+
     // treeview to scrollbar
-    for_tree->add(*m_TreeView);
+    for_tree->add(*treeView);
     for_tree->set_vexpand();
+
     //scrollbar to vbox
     // tree.add(*for_tree);
     //vbox to middle window
-    middle_window.add1(*for_tree);
-    // notebook to middle window
-    middle_window.add2(nb);
+    for_shell = Gtk::manage(new Gtk::ScrolledWindow());
+    
 
+    v_window.pack1(nb,true,false);
+    v_window.add2(*for_shell);
+
+
+    v_window.set_position(v_window.property_max_position());
+    v_window.set_wide_handle();
+
+    middle_window.add1(*for_tree);
+
+
+    middle_window.add2(v_window);
+
+    // notebook to middle window
     middle_window.set_position(0);
 
     //##########################################################################
@@ -191,10 +168,16 @@ void hyp::HypWindow::insert_tab(){
 
     but->signal_clicked().connect( sigc::bind(sigc::mem_fun(*this,&hyp::HypWindow::on_tab_closed),count,vec_text[count-icount].path));
     // nb.append_page(vec_scroll[count-icount],*box);
+
     nb.append_page(vec_scroll[count],*box); 
+
+   
+
     (*text_track)[count]=(count-icount);
     (*types)[count]="text";
     
+
+   
 
     tracker.insert(count);
     count+=1;
@@ -347,49 +330,45 @@ void hyp::HypWindow::on_file_select(std::string file){
     
 }
 //###############################################################################
-bool hyp::HypWindow::on_row_select(const Glib::RefPtr<Gtk::TreeModel>& b,const Gtk::TreeModel::Path& c,bool a){
-    // for Debuging only:
-    // std::cout<<"Selected ... "<<std::flush<<c.to_string()<<std::endl;
-    show_all();
-    if(std::filesystem::is_regular_file((*folders)[c.to_string()]) and (selected->count((*folders)[c.to_string()]) == 0) ){
-        on_file_select((*folders)[c.to_string()]);
+// bool hyp::HypWindow::on_row_select(const Glib::RefPtr<Gtk::TreeModel>& b,const Gtk::TreeModel::Path& c,bool a){
+//     // for Debuging only:
+//     // std::cout<<"Selected ... "<<std::flush<<c.to_string()<<std::endl;
+//     show_all();
+//     if(std::filesystem::is_regular_file((*folders)[c.to_string()]) and (selected->count((*folders)[c.to_string()]) == 0) ){
+//         on_file_select((*folders)[c.to_string()]);
 
-        file->set_label(file_type_analyze(std::filesystem::path((*folders)[c.to_string()]).filename().string()));
+//         file->set_label(file_type_analyze(std::filesystem::path((*folders)[c.to_string()]).filename().string()));
         
-        selected->insert((*folders)[c.to_string()]);
-        return false;
-    }
-    return false;
-}
+//         selected->insert((*folders)[c.to_string()]);
+//         return false;
+//     }
+//     return false;
+// }
 
 //############################################################################### 
 // columns are overlapping and i cant find solution for it
 // so we will deal with it ... later on ...
-void hyp::HypWindow::on_tree_click(const Gtk::TreeModel::iterator& iter, const Gtk::TreeModel::Path& path){
+// void hyp::HypWindow::on_tree_click(const Gtk::TreeModel::iterator& iter, const Gtk::TreeModel::Path& path){
     
-    m_TreeView->columns_autosize();
-    for_tree->queue_resize();
-    m_TreeView->queue_resize();
-    m_TreeView->show_all();
+//     m_TreeView->columns_autosize();
+//     for_tree->show_all();
+//     for_tree->check_resize();
+//     m_TreeView->check_resize();
 
-}
+// }
 
-void hyp::HypWindow::on_row_insert(const Gtk::TreeModel::Path& path,const Gtk::TreeModel::iterator& iter){
-    show_all();
-}
+// void hyp::HypWindow::on_row_insert(const Gtk::TreeModel::Path& path,const Gtk::TreeModel::iterator& iter){
+    
+    
+// }
 //###############################################################################
 
 void hyp::HypWindow::on_thread_call(){
-    
-   
 
     if(thr and thr->joinable()){
         thr->join();
         status->set_label("Done");
     }
-    
-    // m_TreeView->set_sensitive(true);
-    // thr = nullptr;
 }
 //###############################################################################
 void hyp::HypWindow::notify(){
@@ -502,138 +481,14 @@ void hyp::HypWindow::on_folder_open(){
     if (x==""){
         
     }else{
-        Gtk::TreeModel::Row row = *(m_refTreeModel->append());
         status->set_label(std::string("Adding Folder - ")+x);
-    
-        // the fast method and errorfull method    
-        // for_tree->set_sensitive(false);
-        // m_TreeView->set_sensitive(false);
-
-        thr = Glib::Thread::create(sigc::bind(sigc::mem_fun(*this,&hyp::HypWindow::set_dir),x,row,std::to_string(m_row)));
-
         
-        // auto c = Glib::ThreadPool(10,true);
-        // c.push(sigc::bind(sigc::mem_fun(*this,&hyp::HypWindow::set_dir),x,row,std::to_string(m_row)));
-
-        // the slow method
-        // set_dir(x,row,std::to_string(m_row));
-        m_row++;
+        thr = new std::thread([=,this]{treeView->add_folder(x,this);});
         middle_window.set_position(250);
         show_all();
     }
 }
 
-//############################################################################### 
-/* The Function used to set the folder to the folder section of the window using recursion
- *
- *
- */
-void hyp::HypWindow::set_dir(std::string fold,Gtk::TreeModel::Row &row,std::string x){
-    row[m_Columns->m_col_name] = std::filesystem::path(fold).filename().string();
-    x=x+":";
-    int m_child=0;
-    ++thr_count;
-    
-    for(auto const& dir_entry: std::filesystem::directory_iterator{std::filesystem::path(fold)}){
-
-        if (Glib::file_test(dir_entry.path().string(),Glib::FILE_TEST_IS_DIR)){
-
-            //std::cout<<"Directory: "<<dir_entry.path().string()<<std::endl;
-            
-            Gtk::TreeModel::Row childrow = *(m_refTreeModel->append(row.children()));            
-            
-            set_dir(dir_entry.path().string(),childrow,x+std::to_string(m_child));
-            m_child++;
-            
-
-        }else{
-
-            Gtk::TreeModel::Row childrow = *(m_refTreeModel->append(row.children()));
-            // FILE TYPES 
-            if (dir_entry.path().filename().extension().string() == ".cc" or dir_entry.path().filename().extension().string() == ".cpp" ){
-                childrow[m_Columns->m_col_pix] = Gdk::Pixbuf::create_from_file( (std::string(get_current_dir_name())+"/src/resource/cpp/cpp.svg"),24,24 );
-            }else if(dir_entry.path().filename().extension().string() == ".c"){
-                childrow[m_Columns->m_col_pix] = Gdk::Pixbuf::create_from_file( (std::string(get_current_dir_name())+"/src/resource/c/c.svg"),24,24 );
-            }else if(dir_entry.path().filename().extension().string() == ".md"){
-                childrow[m_Columns->m_col_pix] = Gdk::Pixbuf::create_from_file( (std::string(get_current_dir_name())+"/src/resource/md/md.svg"),24,24 );
-            }else if(dir_entry.path().filename().extension().string() == ".o"){
-                childrow[m_Columns->m_col_pix] = Gdk::Pixbuf::create_from_file( (std::string(get_current_dir_name())+"/src/resource/exe.svg"),24,24 );
-            }else if(dir_entry.path().filename().extension().string() == ".svg"){
-                childrow[m_Columns->m_col_pix] = Gdk::Pixbuf::create_from_file( (std::string(get_current_dir_name())+"/src/resource/xml/xml.svg"),24,24 );
-            }else if(dir_entry.path().filename().extension().string() == ".py"){
-                childrow[m_Columns->m_col_pix] = Gdk::Pixbuf::create_from_file( (std::string(get_current_dir_name())+"/src/resource/python/python.svg"),24,24 );
-            }else if(dir_entry.path().filename().extension().string() == ".php"){
-                childrow[m_Columns->m_col_pix] = Gdk::Pixbuf::create_from_file( (std::string(get_current_dir_name())+"/src/resource/php/php.svg"),24,24 );
-            }else if(dir_entry.path().filename().extension().string() == ".rb"){
-                childrow[m_Columns->m_col_pix] = Gdk::Pixbuf::create_from_file( (std::string(get_current_dir_name())+"/src/resource/ruby/ruby.svg"),22,22 );
-            }else if(dir_entry.path().filename().extension().string() == ".js"){
-                childrow[m_Columns->m_col_pix] = Gdk::Pixbuf::create_from_file( (std::string(get_current_dir_name())+"/src/resource/js/js.svg"),24,24 );
-            }else if(dir_entry.path().filename().extension().string() == ".css"){
-                childrow[m_Columns->m_col_pix] = Gdk::Pixbuf::create_from_file( (std::string(get_current_dir_name())+"/src/resource/css3/css3.svg"),24,24 );
-            }else if(dir_entry.path().filename().extension().string() == ".json"){
-                childrow[m_Columns->m_col_pix] = Gdk::Pixbuf::create_from_file( (std::string(get_current_dir_name())+"/src/resource/json/json.svg"),24,24 );
-            }else if(dir_entry.path().filename().extension().string() == ".jpg" or dir_entry.path().filename().extension().string() == ".png" or dir_entry.path().filename().extension().string() == ".jpeg"){
-                childrow[m_Columns->m_col_pix] = Gdk::Pixbuf::create_from_file( (std::string(get_current_dir_name())+"/src/resource/drawing.svg"),24,24 );
-            }else{
-                childrow[m_Columns->m_col_pix] = Gdk::Pixbuf::create_from_file( (std::string(get_current_dir_name())+"/src/resource/text2.svg"),24,24 );
-            }
-            mtx.lock();
-            childrow[m_Columns->m_col_name] = dir_entry.path().filename().string();
-            (*folders)[(x+std::to_string(m_child))] = dir_entry.path().string();
-            mtx.unlock();
-            // for Debuging only:
-            // std::cout<<(x+std::to_string(m_child))<<std::endl;
-            m_child++;        
-        }
-    }
-    --thr_count;
-    if(thr_count==0){ notify();}
-    for_tree->show_all();    
-
-    
-
-}
-//############################################################################### 
-/* The File Type Analyzer for the hyp::HypWindow::on_row_select(...) function
- *
- */
-
-std::string hyp::HypWindow::file_type_analyze(std::string file){
-    if(std::filesystem::path(file).extension().string()==".cc" or std::filesystem::path(file).extension().string()==".cpp"){
-        return std::string("C++");
-    }else if(std::filesystem::path(file).extension().string()==".c"){
-        return std::string("C");
-    }else if(std::filesystem::path(file).extension().string()==".h"){
-        return std::string("C/C++ header");
-    }else if(std::filesystem::path(file).extension().string()==".py"){
-        return std::string("Python");
-    }else if(std::filesystem::path(file).extension().string()==".md"){
-        return std::string("Markdown");
-    }else if(std::filesystem::path(file).extension().string()==".js"){
-        return std::string("Javascript");
-    }else if(std::filesystem::path(file).extension().string()==".rs"){
-        return std::string("Rust");
-    }else if(std::filesystem::path(file).extension().string()==".java"){
-        return std::string("Java");
-    }else if(std::filesystem::path(file).extension().string()==".svg"){
-        return std::string("XML");
-    }else if(std::filesystem::path(file).extension().string()==".html"){
-        return std::string("HTML");
-    }else if(std::filesystem::path(file).extension().string()==".json"){
-        return std::string("JSON");
-    }else if(std::filesystem::path(file).extension().string()==".png"){
-        return std::string("PNG");
-    }else if(std::filesystem::path(file).extension().string()==".jpg"){
-        return std::string("JPG");
-    }else if(std::filesystem::path(file).extension().string()==".jpeg"){
-        return std::string("JPEG");
-    }else if(std::filesystem::path(file).extension().string()==".gif"){
-        return std::string("GIF");
-    }else if(std::filesystem::path(file).filename().string()=="Makefile" or std::filesystem::path(file).filename().string()=="MAKEFILE" ){
-        return std::string("Makefile");
-    }
-    return std::string("Plain Text");
-}
 
 //############################################################################### 
 /* Manages the File Type Label at the Bottom of the window using the Logic ...

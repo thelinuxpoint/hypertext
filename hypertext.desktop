@@ -1,0 +1,9 @@
+[Desktop Entry]
+Name=Hyper Text
+Comment=Multipurpose TextEditor
+Exec=hypertext
+Icon=/usr/share/icons/hicolor/scalable/apps/hypertext.svg
+Terminal=true
+Type=Application
+Categories=TextEditor;
+Keywords=texteditor hypertext
