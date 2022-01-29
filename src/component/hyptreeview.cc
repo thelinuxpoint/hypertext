@@ -24,7 +24,7 @@ hyp::HypTreeView::HypTreeView(hyp::HypWindow *parent){
 	//
 	set_vexpand();
 	//
-	set_enable_tree_lines( true);
+	// set_enable_tree_lines( true);
 	//
 	m_tree_selector = get_selection();
 
@@ -35,6 +35,7 @@ hyp::HypTreeView::HypTreeView(hyp::HypWindow *parent){
     cell_pix = Gtk::manage(new Gtk::CellRendererPixbuf());
     //
     cell_txt = Gtk::manage(new Gtk::CellRendererText());
+
     // 
 	folders = new std::map<std::string,std::string>();
     //
@@ -51,7 +52,30 @@ hyp::HypTreeView::HypTreeView(hyp::HypWindow *parent){
     hpy_column->set_reorderable();
     hpy_column->set_title(" Folders");
 	
-	
+	// Fill the menu
+    auto item = Gtk::make_managed<Gtk::MenuItem>("Rename", true);
+    item->signal_activate().connect(sigc::mem_fun(*this, &hyp::HypTreeView::on_menu_file_rename) );
+    m_Menu.append(*item);
+
+    item = Gtk::make_managed<Gtk::MenuItem>("Add File", true);
+    item->signal_activate().connect(sigc::mem_fun(*this, &hyp::HypTreeView::on_menu_file_addfile) );
+    m_Menu.append(*item);
+
+    item = Gtk::make_managed<Gtk::MenuItem>("New Folder", true);
+    item->signal_activate().connect(sigc::mem_fun(*this, &hyp::HypTreeView::on_menu_file_addfolder) );
+    m_Menu.append(*item);
+
+    Gtk::Entry enen;
+    Gtk::MenuItem mt(enen);
+
+    m_Menu.accelerate(*this);
+    m_Menu.show_all(); //Show all menu items when the menu pops up
+
+
+
+
+
+    //###############################
 	signal_row_expanded().connect( sigc::mem_fun(*this,&hyp::HypTreeView::on_tree_click));
 
     int x = append_column(*hpy_column);
@@ -73,10 +97,16 @@ bool hyp::HypTreeView::on_row_select(const Glib::RefPtr<Gtk::TreeModel>& b,const
         parent->on_file_select((*folders)[c.to_string()]);
 
         parent->file->set_label(file_type_analyze(std::filesystem::path((*folders)[c.to_string()]).filename().string()));
-        
         selected->insert((*folders)[c.to_string()]);
         return false;
+    }else{
+        if( row_expanded(cb)){
+            collapse_row(cb);
+        }else{
+            expand_to_path(cb);
+        }
     }
+    
     return false;
 }
 /*[#] Add Folder Protocol:
@@ -161,7 +191,11 @@ void hyp::HypTreeView::set_dir(std::string fold,Gtk::TreeModel::Row &row,std::st
     }
    	show_all();
 }
-
+/*
+ *
+ *
+ *
+ */
 std::string hyp::HypTreeView::file_type_analyze(std::string file){
     if(std::filesystem::path(file).extension().string()==".cc" or std::filesystem::path(file).extension().string()==".cpp"){
         return std::string("C++");
@@ -198,8 +232,63 @@ std::string hyp::HypTreeView::file_type_analyze(std::string file){
     }
     return std::string("Plain Text");
 }
+/*
+ *
+ *
+ *
+ */ 
+void hyp::HypTreeView::on_menu_file_rename(){
 
+    std::cout << "Rename: " <<""<< std::endl;
+    Gtk::TreeModel::iterator iter = m_tree_selector->get_selected();
+    
 
+    if(iter)
+    {
+      auto id = (*iter)[m_Columns->m_col_name];
+      std::cout << "  Selected ID=" << id << std::endl;
+    }
+ 
+}
+/*
+ *
+ *
+ *
+ */ 
+void hyp::HypTreeView::on_menu_file_addfolder(){
+    std::cout << "Add Folder" << std::endl;
+
+}
+/*
+ *
+ *
+ *
+ */ 
+void hyp::HypTreeView::on_menu_file_addfile(){
+    std::cout << "Add File" << std::endl;
+}
+/*
+ *
+ *
+ *
+ */ 
+bool hyp::HypTreeView::on_button_press_event(GdkEventButton* button_event){
+  
+    bool return_value = false;
+
+    return_value = TreeView::on_button_press_event(button_event);
+
+    if( (button_event->type == GDK_BUTTON_PRESS) && (button_event->button == 3) ){
+        m_Menu.popup_at_pointer((GdkEvent*)button_event);
+    }
+
+    return return_value;
+}
+/*
+ *
+ *
+ *
+ */
 void hyp::HypTreeView::on_tree_click(const Gtk::TreeModel::iterator& iter, const Gtk::TreeModel::Path& path){
     columns_autosize();
     check_resize();

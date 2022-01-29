@@ -9,7 +9,7 @@
 hyp::HypWindow::HypWindow(): Gtk::ApplicationWindow(){
     
     set_title("Hyper Text");
-    set_default_size(900, 600);
+    set_default_size(1000, 650);
 
     Gdk::RGBA black_backk;
     black_backk.set("#151515");
@@ -38,8 +38,7 @@ hyp::HypWindow::HypWindow(): Gtk::ApplicationWindow(){
 
     
 
-    folders = new std::map<std::string,std::string>();
-    selected = new std::set<std::string>();
+   
     types = new std::map<int,std::string>();
     text_track = new std::map<int,int>();
     img_track = new std::map<int,int>();
@@ -68,7 +67,8 @@ hyp::HypWindow::HypWindow(): Gtk::ApplicationWindow(){
     // tree.add(*for_tree);
     //vbox to middle window
     for_shell = Gtk::manage(new Gtk::ScrolledWindow());
-    
+
+
 
     v_window.pack1(nb,true,false);
     v_window.add2(*for_shell);
@@ -120,11 +120,13 @@ hyp::HypWindow::HypWindow(): Gtk::ApplicationWindow(){
     Gdk::RGBA black_back;
 
     black_back.set("#121411");
-    toolbar.set_size_request(-1,25);
-    toolbar.override_background_color(black_back);
+    
 
-    toolbar.pack_start(new_file,false,false,10);;
+
+    toolbar.set_size_request(-1,27);
+    toolbar.override_background_color(black_back);
     toolbar.pack_start(*status,false,false,10);
+
     toolbar.pack_end(*file,false,false,10);
 
     grand_window.override_background_color(black_backk);
@@ -175,9 +177,6 @@ void hyp::HypWindow::insert_tab(){
 
     (*text_track)[count]=(count-icount);
     (*types)[count]="text";
-    
-
-   
 
     tracker.insert(count);
     count+=1;
@@ -200,7 +199,7 @@ void hyp::HypWindow::on_tab_closed(int c,std::string path){
     if (path==""){
 
     }else{
-        selected->erase(path);
+        treeView->selected->erase(path);
     }
     tracker.erase(c);
     show_all();
@@ -320,9 +319,6 @@ void hyp::HypWindow::on_file_select(std::string file){
         (*types)[count]="text";
     }
     
-    // (vec_text[count].buffer)->set_text(Glib::file_get_contents(file));
-    // (vec_text[count].buffer)->set_modified();
-
     tracker.insert(count);
     count+=1;
 

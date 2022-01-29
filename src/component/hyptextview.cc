@@ -67,7 +67,7 @@ bool hyp::HypTextView::on_key_press_event(GdkEventKey* key_event)
 		std::string x = Glib::file_get_contents(this->path);
 
 		if(x != get_buffer()->get_text()){
-			l->set_label(this->file_name+" *");
+			l->set_label(this->file_name+" ●");
 		}else{
 			l->set_label(this->file_name);
 		}
