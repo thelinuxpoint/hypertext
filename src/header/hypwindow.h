@@ -71,7 +71,8 @@ namespace hyp{
 			std::set<int> tracker;
 
 			hyp::HypTreeView *treeView;
-
+			//
+			Gtk::Entry *en;
   			//
   			std::thread *thr;
   			// 

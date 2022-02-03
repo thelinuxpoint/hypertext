@@ -10,7 +10,7 @@
 #include <thread>
 #include <list>
 #include <unistd.h>
-
+#include <fstream>
 
 
 
@@ -54,9 +54,14 @@ namespace hyp{
 			
 			std::mutex mtx;
   			
-  			Gtk::Menu m_Menu;
+  			Gtk::Menu m_Menu_1;
 
-  			
+  			Gtk::Menu m_Menu_2;
+
+  			std::string *str;
+
+
+
   			bool on_row_select(const Glib::RefPtr<Gtk::TreeModel>& b,const Gtk::TreeModel::Path& c,bool a,hyp::HypWindow *parent);
 //
   			void add_folder(std::string path,hyp::HypWindow *caller);

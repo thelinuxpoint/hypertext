@@ -112,19 +112,23 @@ hyp::HypWindow::HypWindow(): Gtk::ApplicationWindow(){
     //##########################################################################
     //Create the toolbar and add it to a container widget:
     //##########################################################################
-    file = new Gtk::Label("Plain Text");
-    status = new Gtk::Label();
+    file = Gtk::manage(new Gtk::Label("Plain Text"));
+    status = Gtk::manage(new Gtk::Label());
 
-    Gtk::Button new_file;
-    new_file.set_image_from_icon_name("document-new");
+    Gtk::Button *new_file = Gtk::manage(new Gtk::Button());
+
+    en = Gtk::manage(new Gtk::Entry());
+    new_file->set_image_from_icon_name("document-new");
     Gdk::RGBA black_back;
 
     black_back.set("#121411");
     
+    new_file->signal_clicked().connect( sigc::mem_fun(*this,&hyp::HypWindow::insert_tab) );
 
-
+    new_file->set_size_request(10,10);
     toolbar.set_size_request(-1,27);
     toolbar.override_background_color(black_back);
+    toolbar.pack_start(*new_file,false,false,10);
     toolbar.pack_start(*status,false,false,10);
 
     toolbar.pack_end(*file,false,false,10);

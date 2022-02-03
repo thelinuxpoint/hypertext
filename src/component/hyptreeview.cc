@@ -22,6 +22,7 @@ hyp::HypTreeView::HypTreeView(hyp::HypWindow *parent){
 	// set color for background
 	override_background_color(black_backk);
 	//
+    str = new std::string();
 	set_vexpand();
 	//
 	// set_enable_tree_lines( true);
@@ -39,6 +40,8 @@ hyp::HypTreeView::HypTreeView(hyp::HypWindow *parent){
     // 
 	folders = new std::map<std::string,std::string>();
     //
+
+
     selected = new std::set<std::string>();
 	//
 	cell_pix->set_property("pixbuf-expander-open", Gdk::Pixbuf::create_from_file( (std::string(get_current_dir_name())+"/src/resource/open0.svg")));
@@ -52,25 +55,45 @@ hyp::HypTreeView::HypTreeView(hyp::HypWindow *parent){
     hpy_column->set_reorderable();
     hpy_column->set_title(" Folders");
 	
-	// Fill the menu
-    auto item = Gtk::make_managed<Gtk::MenuItem>("Rename", true);
+   
+	
+
+    // Fill the menu
+    auto item2 = Gtk::make_managed<Gtk::MenuItem>("Rename Folder", true);
+    item2->signal_activate().connect(sigc::mem_fun(*this, &hyp::HypTreeView::on_menu_file_rename) );
+    m_Menu_1.append(*item2);
+
+    item2 = Gtk::make_managed<Gtk::MenuItem>("Add File", true);
+    item2->signal_activate().connect(sigc::mem_fun(*this, &hyp::HypTreeView::on_menu_file_addfile) );
+    m_Menu_1.append(*item2);
+
+    item2 = Gtk::make_managed<Gtk::MenuItem>("New Folder", true);
+    item2->signal_activate().connect(sigc::mem_fun(*this, &hyp::HypTreeView::on_menu_file_addfolder) );
+    m_Menu_1.append(*item2);
+
+
+
+    m_Menu_1.accelerate(*this);
+    m_Menu_1.show_all(); //Show all menu items when the menu pops up
+
+    auto item = Gtk::make_managed<Gtk::MenuItem>("Rename File", true);
     item->signal_activate().connect(sigc::mem_fun(*this, &hyp::HypTreeView::on_menu_file_rename) );
-    m_Menu.append(*item);
+    m_Menu_2.append(*item);
 
-    item = Gtk::make_managed<Gtk::MenuItem>("Add File", true);
+    item = Gtk::make_managed<Gtk::MenuItem>("Delete File", true);
     item->signal_activate().connect(sigc::mem_fun(*this, &hyp::HypTreeView::on_menu_file_addfile) );
-    m_Menu.append(*item);
+    m_Menu_2.append(*item);
 
-    item = Gtk::make_managed<Gtk::MenuItem>("New Folder", true);
+    item = Gtk::make_managed<Gtk::MenuItem>("Open Containing Folder", true);
     item->signal_activate().connect(sigc::mem_fun(*this, &hyp::HypTreeView::on_menu_file_addfolder) );
-    m_Menu.append(*item);
+    m_Menu_2.append(*item);
 
-    Gtk::Entry enen;
-    Gtk::MenuItem mt(enen);
+    
 
-    m_Menu.accelerate(*this);
-    m_Menu.show_all(); //Show all menu items when the menu pops up
 
+
+    m_Menu_2.accelerate(*this);
+    m_Menu_2.show_all(); //Show all menu items when the menu pops up
 
 
 
@@ -92,6 +115,7 @@ bool hyp::HypTreeView::on_row_select(const Glib::RefPtr<Gtk::TreeModel>& b,const
     // std::cout<<"Selected ... "<<std::flush<<c.to_string()<<std::endl;
     show_all();
     auto c = sorted_model->convert_path_to_child_path(cb);
+    *str = c.to_string();
     if(std::filesystem::is_regular_file((*folders)[c.to_string()]) and (selected->count((*folders)[c.to_string()]) == 0) ){
         
         parent->on_file_select((*folders)[c.to_string()]);
@@ -100,6 +124,7 @@ bool hyp::HypTreeView::on_row_select(const Glib::RefPtr<Gtk::TreeModel>& b,const
         selected->insert((*folders)[c.to_string()]);
         return false;
     }else{
+
         if( row_expanded(cb)){
             collapse_row(cb);
         }else{
@@ -141,6 +166,8 @@ void hyp::HypTreeView::set_dir(std::string fold,Gtk::TreeModel::Row &row,std::st
             
             Gtk::TreeModel::Row childrow = *(m_refTreeModel->append(row.children()));            
             
+            (*folders)[(x+std::to_string(m_child))] = dir_entry.path().string();
+
             set_dir(dir_entry.path().string(),childrow,x+std::to_string(m_child));
 
             m_child++;
@@ -239,16 +266,10 @@ std::string hyp::HypTreeView::file_type_analyze(std::string file){
  */ 
 void hyp::HypTreeView::on_menu_file_rename(){
 
-    std::cout << "Rename: " <<""<< std::endl;
-    Gtk::TreeModel::iterator iter = m_tree_selector->get_selected();
-    
+    std::cout << "Rename: " <<(*folders)[*str]<< std::endl;
 
-    if(iter)
-    {
-      auto id = (*iter)[m_Columns->m_col_name];
-      std::cout << "  Selected ID=" << id << std::endl;
-    }
- 
+   
+    
 }
 /*
  *
@@ -257,6 +278,32 @@ void hyp::HypTreeView::on_menu_file_rename(){
  */ 
 void hyp::HypTreeView::on_menu_file_addfolder(){
     std::cout << "Add Folder" << std::endl;
+  
+    Gtk::Dialog *dialog = new Gtk::Dialog("Add Folder Name");
+    Gtk::Entry *entry = new Gtk::Entry();
+    dialog->add_button("Cancel",Gtk::RESPONSE_NO);
+    dialog->add_button("OK",Gtk::RESPONSE_YES);
+    
+    dialog->get_vbox()->pack_start(*entry,false,false,10);
+    entry->set_size_request(200,40);
+    dialog->set_size_request(300,80);
+    dialog->show_all();
+    
+    int result = dialog->run();
+
+    switch (result){
+        case Gtk::RESPONSE_YES:
+            std::filesystem::create_directory(std::filesystem::path((*folders)[*str]+"/"+entry->get_text()));
+            dialog->close();
+        break;
+        case Gtk::RESPONSE_NO:
+            dialog->close();
+        break;
+        
+        default:
+        
+        break;
+    }
 
 }
 /*
@@ -266,6 +313,9 @@ void hyp::HypTreeView::on_menu_file_addfolder(){
  */ 
 void hyp::HypTreeView::on_menu_file_addfile(){
     std::cout << "Add File" << std::endl;
+    
+   
+
 }
 /*
  *
@@ -279,7 +329,12 @@ bool hyp::HypTreeView::on_button_press_event(GdkEventButton* button_event){
     return_value = TreeView::on_button_press_event(button_event);
 
     if( (button_event->type == GDK_BUTTON_PRESS) && (button_event->button == 3) ){
-        m_Menu.popup_at_pointer((GdkEvent*)button_event);
+        if(Glib::file_test((*folders)[*str],Glib::FILE_TEST_IS_DIR)){
+            m_Menu_1.popup_at_pointer((GdkEvent*)button_event);
+        }else{
+
+            m_Menu_2.popup_at_pointer((GdkEvent*)button_event);
+        }
     }
 
     return return_value;
