@@ -141,6 +141,7 @@ hyp::HypWindow::HypWindow(): Gtk::ApplicationWindow(){
     // main window to Final Window
     add(grand_window);
     //  END  ############
+    std::cout<<"~~~~~~~~| Hyper Text |~~~~~~~~"<<std::endl;
 }
 
 //###############################################################################
@@ -151,7 +152,7 @@ hyp::HypWindow::HypWindow(): Gtk::ApplicationWindow(){
  */ 
 void hyp::HypWindow::insert_tab(){
 
-    std::cout<<"Inserting Tab -> Empty"<<std::endl;
+    std::cout<<"\033[A\33[2K\r"<<"Inserting Tab -> Empty"<<std::endl;
 
     Gtk::Box *box = Gtk::manage(new Gtk::Box());
     Gtk::Label *d = Gtk::manage(new Gtk::Label("untitled"));
@@ -195,7 +196,7 @@ void hyp::HypWindow::insert_tab(){
  *
  */ 
 void hyp::HypWindow::on_tab_closed(int c,std::string path){
-    std::cout<<"Closing Tab : ";
+    std::cout<<"\033[A\33[2K\r"<<"Closing Tab : ";
     auto itrs = tracker.begin();
     auto itre = tracker.find(c);
     std::cout<<std::distance(itrs,itre)<<std::endl;
@@ -218,14 +219,10 @@ void hyp::HypWindow::on_tab_closed(int c,std::string path){
  */ 
 void hyp::HypWindow::on_file_open(){
     
-    std::cout<<"------------------------"<<std::endl;
-
-    std::cout<<"Inserting Tab -> Filled"<<std::endl;
-    std::cout<<"Opening File : ";
+    std::cout<<"\033[A\33[2K\r"<<"Opening File (Imported) : ";
     auto dialog = Gtk::FileChooserNative::create("Please choose a file",*this,Gtk::FILE_CHOOSER_ACTION_OPEN,"Choose","Cancel");
     dialog->run();
     std::cout<<dialog->get_filename()<<std::endl;
-    std::cout<<"------------------------"<<std::endl;
 
     std::string file = dialog->get_filename();
 
@@ -279,13 +276,11 @@ void hyp::HypWindow::on_file_open(){
  *
  *
  */ 
-void hyp::HypWindow::on_file_select(std::string file){
-    std::cout<<"------------------------"<<std::endl;
-    std::cout<<"Inserting Tab from Sidebar -> Filled "<<std::endl;
-    std::cout<<"Opening File : ";    
-    std::cout<<file<<std::endl;
-    std::cout<<"------------------------"<<std::endl;
+void hyp::HypWindow::on_file_select(Glib::ustring fu){
+    std::cout<<"\033[A\33[2K\r"<<"Opening File (Selected): ";    
+    std::cout<<fu<<std::endl;
 
+    std::string file = fu.c_str();
 
     Gtk::Box *box = Gtk::manage(new Gtk::Box());
     Gtk::Label *d = Gtk::manage(new Gtk::Label(std::filesystem::path(file).filename().string()));
@@ -437,7 +432,7 @@ void hyp::HypWindow::on_save_as(){
  */
 void hyp::HypWindow::on_folder_open(){
 
-    std::cout<<"Opening Folder : ";
+    std::cout<<"\033[A\33[2K\r"<<"Opening Folder : ";
     auto dialog = Gtk::FileChooserNative::create("Select a folder",*this,Gtk::FILE_CHOOSER_ACTION_SELECT_FOLDER,"Open","Cancel");
     dialog->run();
     std::cout<<dialog->get_filename()<<std::endl;

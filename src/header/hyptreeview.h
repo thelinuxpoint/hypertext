@@ -28,9 +28,13 @@ namespace hyp{
   				public:
     				ModelColumns(){ 	
     					add(m_col_name); 
-    					add(m_col_pix);
+    					add(m_col_pix);    					add(m_col_path);
+
     				}
     				Gtk::TreeModelColumn<Glib::ustring> m_col_name;
+    				Gtk::TreeModelColumn<Glib::ustring> m_col_path;
+    				
+
     				Gtk::TreeModelColumn<Glib::RefPtr<Gdk::Pixbuf>> m_col_pix;
   			};
 //			
@@ -60,6 +64,7 @@ namespace hyp{
 
   			std::string *str;
 
+  			std::string *org;
 
 
   			bool on_row_select(const Glib::RefPtr<Gtk::TreeModel>& b,const Gtk::TreeModel::Path& c,bool a,hyp::HypWindow *parent);

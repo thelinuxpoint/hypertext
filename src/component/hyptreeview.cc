@@ -13,6 +13,7 @@ hyp::HypTreeView::HypTreeView(hyp::HypWindow *parent){
     m_refTreeModel = Gtk::TreeStore::create(*m_Columns);
 
 	sorted_model = Gtk::TreeModelSort::create(m_refTreeModel);
+
 	sorted_model->set_sort_column(m_Columns->m_col_name, Gtk::SORT_ASCENDING);
 
     // initialize the treeview constructor
@@ -23,6 +24,9 @@ hyp::HypTreeView::HypTreeView(hyp::HypWindow *parent){
 	override_background_color(black_backk);
 	//
     str = new std::string();
+    org = new std::string();
+    
+
 	set_vexpand();
 	//
 	// set_enable_tree_lines( true);
@@ -38,7 +42,6 @@ hyp::HypTreeView::HypTreeView(hyp::HypWindow *parent){
     cell_txt = Gtk::manage(new Gtk::CellRendererText());
 
     // 
-	folders = new std::map<std::string,std::string>();
     //
 
 
@@ -46,19 +49,22 @@ hyp::HypTreeView::HypTreeView(hyp::HypWindow *parent){
 	//
 	cell_pix->set_property("pixbuf-expander-open", Gdk::Pixbuf::create_from_file( (std::string(get_current_dir_name())+"/src/resource/open0.svg")));
     cell_pix->set_property("pixbuf-expander-closed", Gdk::Pixbuf::create_from_file( (std::string(get_current_dir_name())+"/src/resource/close0.svg")));
-    cell_pix->set_padding(3,1);
+    cell_pix->set_padding(3,1);    
+
     //
     hpy_column->pack_start(*cell_pix,false);
     hpy_column->pack_start(*cell_txt, true);
+
     hpy_column->add_attribute(*cell_txt,"text", 0);
     hpy_column->add_attribute(*cell_pix,"pixbuf", 1);
+
     hpy_column->set_reorderable();
     hpy_column->set_title(" Folders");
 	
    
 	
 
-    // Fill the menu
+    // Fill the menu1
     auto item2 = Gtk::make_managed<Gtk::MenuItem>("Rename Folder", true);
     item2->signal_activate().connect(sigc::mem_fun(*this, &hyp::HypTreeView::on_menu_file_rename) );
     m_Menu_1.append(*item2);
@@ -75,6 +81,8 @@ hyp::HypTreeView::HypTreeView(hyp::HypWindow *parent){
 
     m_Menu_1.accelerate(*this);
     m_Menu_1.show_all(); //Show all menu items when the menu pops up
+    
+    // Fill the menu2
 
     auto item = Gtk::make_managed<Gtk::MenuItem>("Rename File", true);
     item->signal_activate().connect(sigc::mem_fun(*this, &hyp::HypTreeView::on_menu_file_rename) );
@@ -89,13 +97,8 @@ hyp::HypTreeView::HypTreeView(hyp::HypWindow *parent){
     m_Menu_2.append(*item);
 
     
-
-
-
     m_Menu_2.accelerate(*this);
     m_Menu_2.show_all(); //Show all menu items when the menu pops up
-
-
 
 
     //###############################
@@ -116,16 +119,20 @@ bool hyp::HypTreeView::on_row_select(const Glib::RefPtr<Gtk::TreeModel>& b,const
     show_all();
     auto c = sorted_model->convert_path_to_child_path(cb);
     *str = c.to_string();
-    if(std::filesystem::is_regular_file((*folders)[c.to_string()]) and (selected->count((*folders)[c.to_string()]) == 0) ){
-        
-        parent->on_file_select((*folders)[c.to_string()]);
+    *org = cb.to_string();
 
-        parent->file->set_label(file_type_analyze(std::filesystem::path((*folders)[c.to_string()]).filename().string()));
-        selected->insert((*folders)[c.to_string()]);
+    auto it = m_refTreeModel->get_iter(*str);
+
+    if(std::filesystem::is_regular_file(Glib::ustring((*it)[m_Columns->m_col_path]).raw()) and (selected->count(Glib::ustring((*it)[m_Columns->m_col_path]).raw()) == 0) ){
+        
+        parent->on_file_select((*it)[m_Columns->m_col_path]);
+
+        parent->file->set_label(file_type_analyze(std::filesystem::path(Glib::ustring((*it)[m_Columns->m_col_path]).raw()).filename().string()));
+        selected->insert(Glib::ustring((*it)[m_Columns->m_col_path]).raw());
         return false;
     }else{
 
-        if( row_expanded(cb)){
+        if( row_expanded(cb) ) {
             collapse_row(cb);
         }else{
             expand_to_path(cb);
@@ -145,7 +152,6 @@ void hyp::HypTreeView::add_folder(std::string path,hyp::HypWindow *caller){
 	set_dir(path,row,std::to_string(m_row));
 	m_row++;
     caller->hyp_dispatch.emit();
-    
     show_all();
 }
 /*[#] Add Folder Main:
@@ -155,6 +161,8 @@ void hyp::HypTreeView::add_folder(std::string path,hyp::HypWindow *caller){
  */
 void hyp::HypTreeView::set_dir(std::string fold,Gtk::TreeModel::Row &row,std::string x){
     row[m_Columns->m_col_name] = std::filesystem::path(fold).filename().string();
+    row[m_Columns->m_col_path] = std::filesystem::path(fold).string();
+
     x=x+":";
     int m_child=0;
     
@@ -166,8 +174,6 @@ void hyp::HypTreeView::set_dir(std::string fold,Gtk::TreeModel::Row &row,std::st
             
             Gtk::TreeModel::Row childrow = *(m_refTreeModel->append(row.children()));            
             
-            (*folders)[(x+std::to_string(m_child))] = dir_entry.path().string();
-
             set_dir(dir_entry.path().string(),childrow,x+std::to_string(m_child));
 
             m_child++;
@@ -177,6 +183,7 @@ void hyp::HypTreeView::set_dir(std::string fold,Gtk::TreeModel::Row &row,std::st
 
             Gtk::TreeModel::Row childrow = *(m_refTreeModel->append(row.children()));
             // FILE TYPES 
+
             if (dir_entry.path().filename().extension().string() == ".cc" or dir_entry.path().filename().extension().string() == ".cpp" ){
                 childrow[m_Columns->m_col_pix] = Gdk::Pixbuf::create_from_file( (std::string(get_current_dir_name())+"/src/resource/cpp/cpp.svg"),24,24 );
             }else if(dir_entry.path().filename().extension().string() == ".c"){
@@ -208,8 +215,8 @@ void hyp::HypTreeView::set_dir(std::string fold,Gtk::TreeModel::Row &row,std::st
             }
             
             childrow[m_Columns->m_col_name] = dir_entry.path().filename().string();
+            childrow[m_Columns->m_col_path] = dir_entry.path().string();
 
-            (*folders)[(x+std::to_string(m_child))] = dir_entry.path().string();
             
             // for Debuging only:
             // std::cout<<(x+std::to_string(m_child))<<std::endl;
@@ -266,10 +273,8 @@ std::string hyp::HypTreeView::file_type_analyze(std::string file){
  */ 
 void hyp::HypTreeView::on_menu_file_rename(){
 
-    std::cout << "Rename: " <<(*folders)[*str]<< std::endl;
+    // std::cout << "Rename: " <<(*folders)[*str]<< std::endl;
 
-   
-    
 }
 /*
  *
@@ -277,7 +282,6 @@ void hyp::HypTreeView::on_menu_file_rename(){
  *
  */ 
 void hyp::HypTreeView::on_menu_file_addfolder(){
-    std::cout << "Add Folder" << std::endl;
   
     Gtk::Dialog *dialog = new Gtk::Dialog("Add Folder Name");
     Gtk::Entry *entry = new Gtk::Entry();
@@ -289,13 +293,36 @@ void hyp::HypTreeView::on_menu_file_addfolder(){
     dialog->set_size_request(300,80);
     dialog->show_all();
     
+    
     int result = dialog->run();
 
     switch (result){
-        case Gtk::RESPONSE_YES:
-            std::filesystem::create_directory(std::filesystem::path((*folders)[*str]+"/"+entry->get_text()));
+        case Gtk::RESPONSE_YES:{
+            auto tmp = m_refTreeModel->get_iter(*str);
+
+            std::filesystem::create_directory(std::filesystem::path(Glib::ustring((*tmp)[m_Columns->m_col_path]).raw()+"/"+entry->get_text()));
+            auto c = m_refTreeModel->get_iter(*str);
+            // auto cb = sorted_model->convert_child_iter_to_iter(c);
+            // auto t = m_refTreeModel->get_iter(*str+":");
+            Gtk::TreeModel::Row row = *(m_refTreeModel->append(c->children()));
+            // Gtk::TreeModel::Row row = *(m_refTreeModel->insert(c));
+            // row.append();
+
+            row[m_Columns->m_col_name] = entry->get_text();
+
+            row[m_Columns->m_col_path] = Glib::ustring((*tmp)[m_Columns->m_col_path]).raw()+"/"+entry->get_text();
+
+            
+            sorted_model = Gtk::TreeModelSort::create(m_refTreeModel);
+
+            sorted_model->set_sort_column(m_Columns->m_col_name, Gtk::SORT_ASCENDING);
+
+            unset_model();set_model(sorted_model); 
+            expand_to_path(Gtk::TreePath(*org+":"));
+
             dialog->close();
-        break;
+            break;
+        }
         case Gtk::RESPONSE_NO:
             dialog->close();
         break;
@@ -312,8 +339,59 @@ void hyp::HypTreeView::on_menu_file_addfolder(){
  *
  */ 
 void hyp::HypTreeView::on_menu_file_addfile(){
-    std::cout << "Add File" << std::endl;
     
+    Gtk::Dialog *dialog = new Gtk::Dialog("Add File Name");
+    Gtk::Entry *entry = new Gtk::Entry();
+    dialog->add_button("Cancel",Gtk::RESPONSE_NO);
+    dialog->add_button("OK",Gtk::RESPONSE_YES);
+    
+    dialog->get_vbox()->pack_start(*entry,false,false,10);
+    entry->set_size_request(200,40);
+    dialog->set_size_request(300,80);
+    dialog->show_all();
+    
+    
+    int result = dialog->run();
+
+    switch (result){
+        case Gtk::RESPONSE_YES:{
+            auto tmp = m_refTreeModel->get_iter(*str);
+
+            std::ofstream f(Glib::ustring((*tmp)[m_Columns->m_col_path]).raw()+"/"+entry->get_text());
+            f.close();
+            // std::filesystem::create_directory(std::filesystem::path(Glib::ustring((*tmp)[m_Columns->m_col_path]).raw()+"/"+entry->get_text()));
+            
+            auto c = m_refTreeModel->get_iter(*str);
+            // auto cb = sorted_model->convert_child_iter_to_iter(c);
+            // auto t = m_refTreeModel->get_iter(*str+":");
+            Gtk::TreeModel::Row row = *(m_refTreeModel->append(c->children()));
+
+            // Gtk::TreeModel::Row row = *(m_refTreeModel->insert(c));
+            // row.append();
+
+            row[m_Columns->m_col_name] = entry->get_text();
+            row[m_Columns->m_col_pix] = Gdk::Pixbuf::create_from_file( (std::string(get_current_dir_name())+"/src/resource/text2.svg"),24,24 );
+            row[m_Columns->m_col_path] = Glib::ustring((*tmp)[m_Columns->m_col_path]).raw()+"/"+entry->get_text();
+
+            
+            sorted_model = Gtk::TreeModelSort::create(m_refTreeModel);
+
+            sorted_model->set_sort_column(m_Columns->m_col_name, Gtk::SORT_ASCENDING);
+
+            unset_model();set_model(sorted_model); 
+            expand_to_path(Gtk::TreePath(*org+":"));
+
+            dialog->close();
+            break;
+        }
+        case Gtk::RESPONSE_NO:
+            dialog->close();
+        break;
+        
+        default:
+        
+        break;
+    }
    
 
 }
@@ -327,9 +405,9 @@ bool hyp::HypTreeView::on_button_press_event(GdkEventButton* button_event){
     bool return_value = false;
 
     return_value = TreeView::on_button_press_event(button_event);
-
+    auto c = m_refTreeModel->get_iter(*str);
     if( (button_event->type == GDK_BUTTON_PRESS) && (button_event->button == 3) ){
-        if(Glib::file_test((*folders)[*str],Glib::FILE_TEST_IS_DIR)){
+        if(Glib::file_test(Glib::ustring((*c)[m_Columns->m_col_path]).raw(),Glib::FILE_TEST_IS_DIR)){
             m_Menu_1.popup_at_pointer((GdkEvent*)button_event);
         }else{
 

@@ -126,7 +126,7 @@ namespace hyp{
   			// 
   			void on_folder_open();
 			
-			void on_file_select(std::string file);
+			void on_file_select(Glib::ustring file);
 
   			//Child widgets:
   			Glib::RefPtr<Gtk::Builder> m_refBuilder;
