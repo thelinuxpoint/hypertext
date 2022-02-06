@@ -21,6 +21,7 @@
 
 
 namespace hyp{
+	
 
 	class HypWindow : public Gtk::ApplicationWindow {
 		public:

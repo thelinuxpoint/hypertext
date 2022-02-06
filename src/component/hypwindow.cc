@@ -141,7 +141,9 @@ hyp::HypWindow::HypWindow(): Gtk::ApplicationWindow(){
     // main window to Final Window
     add(grand_window);
     //  END  ############
-    std::cout<<"~~~~~~~~| Hyper Text |~~~~~~~~"<<std::endl;
+
+    std::cout<<"\x1b[37mHyperText \x1b[35mQuit ... \x1b[36mStart\x1b[0m\n"<<std::endl;
+
 }
 
 //###############################################################################
