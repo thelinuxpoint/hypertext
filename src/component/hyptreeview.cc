@@ -77,6 +77,10 @@ hyp::HypTreeView::HypTreeView(hyp::HypWindow *parent){
     item2->signal_activate().connect(sigc::mem_fun(*this, &hyp::HypTreeView::on_menu_file_addfolder) );
     m_Menu_1.append(*item2);
 
+    item2 = Gtk::make_managed<Gtk::MenuItem>("Remove Folder From Project", true);
+    item2->signal_activate().connect(sigc::mem_fun(*this, &hyp::HypTreeView::on_menu_file_removefolder));
+    m_Menu_1.append(*item2);
+
 
 
     m_Menu_1.accelerate(*this);
@@ -257,6 +261,7 @@ void hyp::HypTreeView::set_dir(std::string fold,Gtk::TreeModel::Row &row,std::st
     }
    	show_all();
 }
+
 /*
  *
  *
@@ -305,6 +310,17 @@ std::string hyp::HypTreeView::file_type_analyze(std::string file){
  *
  *
  */ 
+void hyp::HypTreeView::on_menu_file_removefolder(){
+    auto tmp = m_refTreeModel->get_iter(*str);
+    m_refTreeModel->erase(tmp);
+    sorted_model = Gtk::TreeModelSort::create(m_refTreeModel);
+
+    sorted_model->set_sort_column(m_Columns->m_col_name, Gtk::SORT_ASCENDING);
+    unset_model();set_model(sorted_model); 
+    
+}
+
+
 void hyp::HypTreeView::on_menu_file_rename(){
 
     // std::cout << "Rename: " <<(*folders)[*str]<< std::endl;
@@ -345,7 +361,7 @@ void hyp::HypTreeView::on_menu_file_addfolder(){
             row[m_Columns->m_col_name] = entry->get_text();
 
             row[m_Columns->m_col_path] = Glib::ustring((*tmp)[m_Columns->m_col_path]).raw()+"/"+entry->get_text();
-
+            row[m_Columns->m_col_pix] = Gdk::Pixbuf::create_from_file( (std::string(get_current_dir_name())+"/src/resource/close0.svg"));
             
             sorted_model = Gtk::TreeModelSort::create(m_refTreeModel);
 

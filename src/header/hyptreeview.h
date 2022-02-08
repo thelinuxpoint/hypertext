@@ -81,6 +81,7 @@ namespace hyp{
 
   			//Signal handler for popup menu items:
   			void on_menu_file_addfolder();
+  			void on_menu_file_removefolder();
 
   			void on_menu_file_addfile();
 
