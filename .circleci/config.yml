@@ -9,7 +9,7 @@ jobs:
       - checkout
       - run:
           name: Installing SUDO
-          command: 'apt-get update && apt-get install -y sudo --allow'
+          command: 'apt-get update && apt-get install -y sudo'
       - run:
           name: Installing GCC & G++
           command: 'sudo apt-get update -y && sudo apt-get install g++-11 -y'
