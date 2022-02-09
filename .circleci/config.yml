@@ -20,5 +20,5 @@ jobs:
           command: 'sudo apt-get -y install libgtksourceviewmm-3.0-dev'
       - run:
           name: Creating Build Files
-          command: 'mkdir build && make'
+          command: 'g++ --version && mkdir build && make'
       
