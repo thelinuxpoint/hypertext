@@ -37,7 +37,7 @@ namespace hyp{
 
     				Gtk::TreeModelColumn<Glib::RefPtr<Gdk::Pixbuf>> m_col_pix;
   			};
-  						
+			
 			ModelColumns *m_Columns;
 //
   			Gtk::TreeViewColumn *hpy_column;
