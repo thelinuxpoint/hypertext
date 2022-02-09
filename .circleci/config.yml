@@ -11,7 +11,11 @@ jobs:
           command: 'apt-get update && apt-get install -y sudo && rm -rf /var/lib/apt/lists/*'
       - run:
           name: Installing GCC & G++
-          command: 'sudo apt-get install -y g++-11'
+          command: 'sudo apt-get update -y && 
+					sudo apt-get install build-essential software-properties-common -y && 
+					sudo add-apt-repository ppa:ubuntu-toolchain-r/test -y && 
+					sudo apt-get update -y && 
+					sudo apt-get install gcc-8 g++-8 -y'
       - run:
           name: Installing libgtkmm-3.0-dev
           command: 'sudo apt-get -y install libgtkmm-3.0-dev'
