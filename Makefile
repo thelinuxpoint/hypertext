@@ -26,44 +26,44 @@ cflags  += $(shell pkg-config --cflags gtksourceviewmm-3.0)
 
 main: $(cfiles) $(hfiles) $(ofiles)
 	@echo "Compiling Main HyperText@v0.1.1"
-	@g++ --std=c++20 -Wall  $(cflags) main.cc -o ./build/hypertext  $(ofiles) $(libs) >> log 2>&1
+	@g++ --std=c++20 -Wall  $(cflags) main.cc -o ./build/hypertext  $(ofiles) $(libs) 
 
 # object files
 
 
 ./build/hyptextview.o: ./src/component/hyptextview.cc ./src/header/hyptextview.h
 	@printf "Compiling hyptextview.cc ~> hyptextview.o"
-	@g++ --std=c++20 -c $(cflags) ./src/component/hyptextview.cc -o ./build/hyptextview.o >> log 2>&1
+	@g++ --std=c++20 -c $(cflags) ./src/component/hyptextview.cc -o ./build/hyptextview.o 
 	@echo " => [ok]"
 # 
 ./build/hyptreeview.o: ./src/component/hyptreeview.cc ./src/header/hyptreeview.h
 	@printf "Compiling hyptreeview.cc ~> hyptreeview.o"
-	@g++ --std=c++20 -c $(cflags) ./src/component/hyptreeview.cc -o ./build/hyptreeview.o >> log 2>&1
+	@g++ --std=c++20 -c $(cflags) ./src/component/hyptreeview.cc -o ./build/hyptreeview.o 
 	@echo " => [ok]"
 # 
 ./build/hypworker.o: ./src/component/hypworker.cc ./src/header/hypworker.h
 	@printf "Compiling hypworker.cc ~> hypworker.o"
-	@g++ --std=c++20 -c $(cflags) ./src/component/hypworker.cc -o ./build/hypworker.o >> log 2>&1
+	@g++ --std=c++20 -c $(cflags) ./src/component/hypworker.cc -o ./build/hypworker.o
 	@echo " => [ok]"
 # 
 ./build/hypimgview.o: ./src/component/hypimgview.cc ./src/header/hypimgview.h
 	@printf "Compiling hypimgview.cc ~> hypimgview.o"
-	@g++ --std=c++20 -c $(cflags) ./src/component/hypimgview.cc -o ./build/hypimgview.o >> log 2>&1
+	@g++ --std=c++20 -c $(cflags) ./src/component/hypimgview.cc -o ./build/hypimgview.o 
 	@echo " => [ok]"
 # 
 ./build/hypshell.o: ./src/component/hypshell.cc ./src/header/hypshell.h
 	@printf "Compiling hypshell.cc ~> hypshell.o"
-	@g++ --std=c++20 -c $(cflags) ./src/component/hypshell.cc -o ./build/hypshell.o >> log 2>&1
+	@g++ --std=c++20 -c $(cflags) ./src/component/hypshell.cc -o ./build/hypshell.o 
 	@echo " => [ok]"
 # 
 ./build/hypertextapp.o: ./src/component/hypertextapp.cc ./src/header/hypertextapp.h
 	@printf "Compiling hypertextapp.cc ~> hypertextapp.o"
-	@g++ --std=c++20 -c $(cflags) ./src/component/hypertextapp.cc -o ./build/hypertextapp.o >> log 2>&1
+	@g++ --std=c++20 -c $(cflags) ./src/component/hypertextapp.cc -o ./build/hypertextapp.o 
 	@echo " => [ok]"
 # 
 ./build/hypwindow.o: ./src/component/hypwindow.cc ./src/header/hypwindow.h
 	@printf "Compiling hypwindow.cc ~> hypwindow.o"
-	@g++ --std=c++20 -c $(cflags) ./src/component/hypwindow.cc -o ./build/hypwindow.o >> log 2>&1
+	@g++ --std=c++20 -c $(cflags) ./src/component/hypwindow.cc -o ./build/hypwindow.o 
 	@echo " => [ok]"
 
 
@@ -83,7 +83,5 @@ install:
 
 run:
 	@clear
-	@touch log
-	@echo > log
 	@make
 	@./build/hypertext
