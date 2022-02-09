@@ -7,6 +7,12 @@ jobs:
     steps:
       - checkout
       - run:
+          name: Installing SUDO
+          command: 'sudo apt-get update && apt-get install -y sudo && rm -rf /var/lib/apt/lists/*'
+      - run:
+          name: Installing GCC & G++
+          command: 'sudo apt-get update && apt-get install -y gcc g++'
+      - run:
           name: Installing libgtkmm-3.0-dev
           command: 'sudo apt-get install libgtkmm-3.0-dev'
       - run:
