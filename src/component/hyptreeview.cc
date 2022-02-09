@@ -4,6 +4,9 @@
  *		
  *
  */ 
+
+#define hyplog(x) std::cout<<std::flush<<x;
+
 hyp::HypTreeView::HypTreeView(hyp::HypWindow *parent){
 	//
 	Gdk::RGBA black_backk;black_backk.set("#151515");
@@ -204,8 +207,6 @@ void hyp::HypTreeView::set_dir(std::string fold,Gtk::TreeModel::Row &row,std::st
     for(auto const& dir_entry: std::filesystem::directory_iterator{std::filesystem::path(fold)}){
 
         if (Glib::file_test(dir_entry.path().string(),Glib::FILE_TEST_IS_DIR)){
-
-            // std::cout<<"Directory: "<<dir_entry.path().string()<<std::endl;
             
             Gtk::TreeModel::Row childrow = *(m_refTreeModel->append(row.children()));            
             
@@ -226,8 +227,6 @@ void hyp::HypTreeView::set_dir(std::string fold,Gtk::TreeModel::Row &row,std::st
                 childrow[m_Columns->m_col_pix] = Gdk::Pixbuf::create_from_file( (std::string(get_current_dir_name())+"/src/resource/c/c.svg"),24,24 );
             }else if(check_ext == ".md"){
                 childrow[m_Columns->m_col_pix] = Gdk::Pixbuf::create_from_file( (std::string(get_current_dir_name())+"/src/resource/md/md.svg"),24,24 );
-            }else if(check_ext == ".o"){
-                childrow[m_Columns->m_col_pix] = Gdk::Pixbuf::create_from_file( (std::string(get_current_dir_name())+"/src/resource/exe.svg"),24,24 );
             }else if(check_ext == ".svg"){
                 childrow[m_Columns->m_col_pix] = Gdk::Pixbuf::create_from_file( (std::string(get_current_dir_name())+"/src/resource/xml/xml.svg"),24,24 );
             }else if(check_ext == ".py"){
@@ -352,14 +351,13 @@ void hyp::HypTreeView::on_menu_file_addfolder(){
 
             std::filesystem::create_directory(std::filesystem::path(Glib::ustring((*tmp)[m_Columns->m_col_path]).raw()+"/"+entry->get_text()));
             auto c = m_refTreeModel->get_iter(*str);
-            // auto cb = sorted_model->convert_child_iter_to_iter(c);
-            // auto t = m_refTreeModel->get_iter(*str+":");
+            
+            if ( entry->get_text() == ""){
+                hyplog("Empty String Provided\n");
+                break;
+            }
             Gtk::TreeModel::Row row = *(m_refTreeModel->append(c->children()));
-            // Gtk::TreeModel::Row row = *(m_refTreeModel->insert(c));
-            // row.append();
-
             row[m_Columns->m_col_name] = entry->get_text();
-
             row[m_Columns->m_col_path] = Glib::ustring((*tmp)[m_Columns->m_col_path]).raw()+"/"+entry->get_text();
             row[m_Columns->m_col_pix] = Gdk::Pixbuf::create_from_file( (std::string(get_current_dir_name())+"/src/resource/close0.svg"));
             
@@ -370,6 +368,7 @@ void hyp::HypTreeView::on_menu_file_addfolder(){
             unset_model();set_model(sorted_model); 
             expand_to_path(Gtk::TreePath(*org+":"));
 
+        end:
             dialog->close();
             break;
         }
@@ -412,32 +411,35 @@ void hyp::HypTreeView::on_menu_file_addfile(){
             
             auto c = m_refTreeModel->get_iter(*str);
             
-            Gtk::TreeModel::Row row = *(m_refTreeModel->append(c->children()));
 
-           
+            if ( entry->get_text() == ""){
+                hyplog("Empty String Provided\n");
 
-            row[m_Columns->m_col_name] = entry->get_text();
-            row[m_Columns->m_col_pix] = Gdk::Pixbuf::create_from_file( (std::string(get_current_dir_name())+"/src/resource/text2.svg"),24,24 );
-            row[m_Columns->m_col_path] = Glib::ustring((*tmp)[m_Columns->m_col_path]).raw()+"/"+entry->get_text();
+            }else{
+                Gtk::TreeModel::Row row = *(m_refTreeModel->append(c->children()));
+
+                row[m_Columns->m_col_name] = entry->get_text();
+                row[m_Columns->m_col_pix] = Gdk::Pixbuf::create_from_file( (std::string(get_current_dir_name())+"/src/resource/text2.svg"),24,24 );
+                row[m_Columns->m_col_path] = Glib::ustring((*tmp)[m_Columns->m_col_path]).raw()+"/"+entry->get_text();
 
             
-            sorted_model = Gtk::TreeModelSort::create(m_refTreeModel);
+                sorted_model = Gtk::TreeModelSort::create(m_refTreeModel);
+                sorted_model->set_sort_column(m_Columns->m_col_name, Gtk::SORT_ASCENDING);
 
-            sorted_model->set_sort_column(m_Columns->m_col_name, Gtk::SORT_ASCENDING);
+                unset_model();set_model(sorted_model); 
+                expand_to_path(Gtk::TreePath(*org+":"));
 
-            unset_model();set_model(sorted_model); 
-            expand_to_path(Gtk::TreePath(*org+":"));
+            }
 
             dialog->close();
             break;
         }
         case Gtk::RESPONSE_NO:
             dialog->close();
-        break;
-        
+            break;
         default:
         
-        break;
+            break;  
     }
    
 
@@ -453,10 +455,11 @@ bool hyp::HypTreeView::on_button_press_event(GdkEventButton* button_event){
 
     return_value = TreeView::on_button_press_event(button_event);
     auto c = m_refTreeModel->get_iter(*str);
+    
     if( (button_event->type == GDK_BUTTON_PRESS) && (button_event->button == 3) ){
         if(Glib::file_test(Glib::ustring((*c)[m_Columns->m_col_path]).raw(),Glib::FILE_TEST_IS_DIR)){
+            
             m_Menu_1.popup_at_pointer((GdkEvent*)button_event);
-
         }else{
 
             m_Menu_2.popup_at_pointer((GdkEvent*)button_event);

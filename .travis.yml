@@ -1,0 +1,8 @@
+language: cpp
+
+before_install:
+  - sudo apt-get install libgtkmm-3.0-dev
+  - sudo apt-get install libgtksourceviewmm-3.0-dev
+
+install:
+  - sudo make install

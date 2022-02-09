@@ -21,6 +21,9 @@ cflags  += $(shell pkg-config --cflags gtksourceviewmm-3.0)
 # libgtksourceviewmm-3.0-dev
 
 
+
+
+
 main: $(cfiles) $(hfiles) $(ofiles)
 	@echo "Compiling Main HyperText@v0.1.1"
 	@g++ --std=c++20 -Wall  $(cflags) main.cc -o ./build/hypertext  $(ofiles) $(libs) >> log 2>&1
