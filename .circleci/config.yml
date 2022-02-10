@@ -20,7 +20,4 @@ jobs:
       - run:
           name: Installing libgtksourceviewmm-3.0-dev
           command: 'sudo apt-get -y install libgtksourceviewmm-3.0-dev'
-      - run:
-          name: Creating Build Files
-          command: 'mkdir build && make'
       

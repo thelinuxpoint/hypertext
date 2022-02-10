@@ -98,6 +98,7 @@ namespace hyp{
 			std::string file_type_analyze(std::string file);
 
 			void on_thread_call();
+			void sidebar_toggle();
 
   			//Signal handlers:
 			void on_save();

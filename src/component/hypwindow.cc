@@ -116,7 +116,9 @@ hyp::HypWindow::HypWindow(): Gtk::ApplicationWindow(){
     status = Gtk::manage(new Gtk::Label());
 
     Gtk::Button *new_file = Gtk::manage(new Gtk::Button());
-
+    Gtk::Button *eye = Gtk::manage(new Gtk::Button());
+    Gtk::Image* image = Gtk::manage(new Gtk::Image{Gdk::Pixbuf::create_from_file( (std::string(get_current_dir_name())+"/src/resource/sidebar.svg"),20,20 )});
+    
     en = Gtk::manage(new Gtk::Entry());
     new_file->set_image_from_icon_name("document-new");
     Gdk::RGBA black_back;
@@ -124,11 +126,15 @@ hyp::HypWindow::HypWindow(): Gtk::ApplicationWindow(){
     black_back.set("#121411");
     
     new_file->signal_clicked().connect( sigc::mem_fun(*this,&hyp::HypWindow::insert_tab) );
-
+    eye->signal_clicked().connect( sigc::mem_fun(*this,&hyp::HypWindow::sidebar_toggle) );
+    eye->set_image(*image);
     new_file->set_size_request(10,10);
     toolbar.set_size_request(-1,27);
     toolbar.override_background_color(black_back);
-    toolbar.pack_start(*new_file,false,false,10);
+
+    toolbar.pack_start(*eye,false,false,5);
+    toolbar.pack_start(*new_file,false,false,5);
+
     toolbar.pack_start(*status,false,false,10);
 
     toolbar.pack_end(*file,false,false,10);
@@ -145,6 +151,15 @@ hyp::HypWindow::HypWindow(): Gtk::ApplicationWindow(){
     std::cout<<"\x1b[37mHyperText \x1b[35mQuit ... \x1b[36mStart\x1b[0m\n"<<std::endl;
 
 }
+void hyp::HypWindow::sidebar_toggle(){
+    if (middle_window.property_position()>0){
+        middle_window.set_position(0);
+    }else{
+        middle_window.set_position(250);
+    }
+
+}
+
 
 //###############################################################################
 /*
