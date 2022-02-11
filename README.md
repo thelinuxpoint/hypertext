@@ -31,3 +31,10 @@ mkdir build
 make
 
 ```
+
+## To run
+
+```shell
+make run
+```
+
