@@ -84,6 +84,7 @@ namespace hyp{
 
 			Gtk::ScrolledWindow *for_shell;
 
+			bool focus_save = false;
 
 
 
@@ -99,7 +100,7 @@ namespace hyp{
 
 			void on_thread_call();
 			void sidebar_toggle();
-
+			void on_myset_focus(Gtk::Widget* focus);
   			//Signal handlers:
 			void on_save();
 
@@ -108,7 +109,9 @@ namespace hyp{
   			void on_menu_others();
 
 			void on_new_window();
-			
+			bool on_focus_out_event(GdkEventFocus* gdk_event);
+			void on_save_focus();
+
   			void on_menu_choices(const Glib::ustring& parameter);
 
   			void on_menu_choices_other(int parameter);
@@ -127,7 +130,7 @@ namespace hyp{
   			void on_file_open();
   			// 
   			void on_folder_open();
-			
+			bool on_key_press_event(GdkEventKey* key_event);
 			void on_file_select(Glib::ustring file);
 
   			//Child widgets:
