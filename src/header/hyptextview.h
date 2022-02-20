@@ -34,5 +34,7 @@ namespace hyp{
 			void file_type_analyze(std::string);
 		
 			void on_buffer_changed(std::string x);
+
+			void defined();
 	};
 }

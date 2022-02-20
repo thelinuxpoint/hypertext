@@ -432,6 +432,7 @@ void hyp::HypWindow::on_save(){
             std::cout<<"Saving ~> "<<vec_text[(*text_track)[value]].path<<std::endl;
             Glib::file_set_contents(vec_text[(*text_track)[value]].path,vec_text[(*text_track)[value]].get_buffer()->get_text());
             vec_text[(*text_track)[value]].l->set_label(vec_text[(*text_track)[value]].file_name);
+            vec_text[(*text_track)[value]].defined();
         }
         
 
