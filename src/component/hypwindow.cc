@@ -5,40 +5,44 @@
  *
  *
  *
- */ 
+ */
 hyp::HypWindow::HypWindow(): Gtk::ApplicationWindow(){
-    
+
     set_title("Hyper Text");
     set_default_size(1000, 650);
 
+    auto css = Gtk::CssProvider::create();
+    get_style_context()->add_provider_for_screen(Gdk::Screen::get_default(),
+                                               css,
+                                               GTK_STYLE_PROVIDER_PRIORITY_APPLICATION);
     Gdk::RGBA black_backk;
     black_backk.set("#151515");
     override_background_color(black_backk);
-    
+
     Gdk::Color c;
     c.set_rgb(24,25,21);
 
     Glib::ustring data;
 
-    data="textview text {color : white; font-size:50px; font-family:monospace; font-weight:bold;} "; 
+    data="textview text {color : white; font-size:50px; font-family:monospace; font-weight:bold;} ";
 
     nb.set_scrollable(true);
 
-    auto css = Gtk::CssProvider::create();
 
-    if(not css->load_from_data(data)) {
+    if(not css->load_from_path(std::string(get_current_dir_name())+"/src/styles/style.css")) {
         std::cerr << "Failed to load css\n";
         std::exit(1);
     }
-    auto screen = Gdk::Screen::get_default();
-    auto ctx = grand_window.get_style_context();
-    ctx->add_provider_for_screen(screen, css, GTK_STYLE_PROVIDER_PRIORITY_APPLICATION);
+
+    get_style_context()->add_provider_for_screen(Gdk::Screen::get_default(),
+                                               css,
+                                               GTK_STYLE_PROVIDER_PRIORITY_APPLICATION);
 
     for_tree = Gtk::manage(new Gtk::ScrolledWindow());
 
-    
 
-   
+
+
     types = new std::map<int,std::string>();
     text_track = new std::map<int,int>();
     img_track = new std::map<int,int>();
@@ -50,13 +54,13 @@ hyp::HypWindow::HypWindow(): Gtk::ApplicationWindow(){
     treeView = Gtk::manage(new hyp::HypTreeView(this));
 
     // m_TreeView->signal_row_expanded().connect( sigc::mem_fun(*this,&hyp::HypWindow::on_tree_click));
-    // m_TreeView->signal_row_collapsed().connect( sigc::mem_fun(*this,&hyp::HypWindow::on_tree_click));  
+    // m_TreeView->signal_row_collapsed().connect( sigc::mem_fun(*this,&hyp::HypWindow::on_tree_click));
 
     nb.override_background_color(black_backk);
     nb.signal_switch_page().connect( sigc::mem_fun(*this,&hyp::HypWindow::on_tab_change));
 
     // nb.
-    //##########################################################################    
+    //##########################################################################
     // ADD #####################################################################
 
 
@@ -71,9 +75,11 @@ hyp::HypWindow::HypWindow(): Gtk::ApplicationWindow(){
 
 
 
-    v_window.pack1(nb,true,false);
+    v_window.pack1(middle_window,true,false);
     v_window.add2(*for_shell);
-
+    Gdk::RGBA grey;
+    grey.set("#202120");
+    v_window.override_background_color(grey);
 
     v_window.set_position(v_window.property_max_position());
     v_window.set_wide_handle();
@@ -81,7 +87,7 @@ hyp::HypWindow::HypWindow(): Gtk::ApplicationWindow(){
     middle_window.add1(*for_tree);
 
 
-    middle_window.add2(v_window);
+    middle_window.add2(nb);
 
     // notebook to middle window
     middle_window.set_position(0);
@@ -94,7 +100,7 @@ hyp::HypWindow::HypWindow(): Gtk::ApplicationWindow(){
     add_action("openfolder", sigc::mem_fun(*this, &hyp::HypWindow::on_folder_open));
 
     add_action("openfile", sigc::mem_fun(*this, &hyp::HypWindow::on_file_open));
-    
+
     add_action("newfile", sigc::mem_fun(*this, &hyp::HypWindow::insert_tab));
 
     add_action("save", sigc::mem_fun(*this, &hyp::HypWindow::on_save));
@@ -109,7 +115,7 @@ hyp::HypWindow::HypWindow(): Gtk::ApplicationWindow(){
     m_refToggle = add_action_bool("sometoggle",sigc::mem_fun(*this, &hyp::HypWindow::on_menu_toggle), false);
     //Help menu:
     // add_action("about", sigc::mem_fun(*this, &hyp::HypWindow::on_menu_others));
-    
+
     //##########################################################################
     //Create the toolbar and add it to a container widget:
     //##########################################################################
@@ -119,13 +125,13 @@ hyp::HypWindow::HypWindow(): Gtk::ApplicationWindow(){
     Gtk::Button *new_file = Gtk::manage(new Gtk::Button());
     Gtk::Button *eye = Gtk::manage(new Gtk::Button());
     Gtk::Image* image = Gtk::manage(new Gtk::Image{Gdk::Pixbuf::create_from_file( (std::string(get_current_dir_name())+"/src/resource/sidebar.svg"),20,20 )});
-    
+
     en = Gtk::manage(new Gtk::Entry());
     new_file->set_image_from_icon_name("document-new");
     Gdk::RGBA black_back;
 
     black_back.set("#121411");
-    
+
     new_file->signal_clicked().connect( sigc::mem_fun(*this,&hyp::HypWindow::insert_tab) );
     eye->signal_clicked().connect( sigc::mem_fun(*this,&hyp::HypWindow::sidebar_toggle) );
     eye->set_image(*image);
@@ -144,14 +150,15 @@ hyp::HypWindow::HypWindow(): Gtk::ApplicationWindow(){
     grand_window.pack_end(toolbar, false,false,0);
 
     // middlewindow to main window
-    grand_window.add(middle_window);
+    grand_window.add(v_window);
     // main window to Final Window
     add(grand_window);
     //  END  ############
 
-    std::cout<<"\x1b[37mHyperText \x1b[35mQuit ... \x1b[36mStart\x1b[0m\n"<<std::endl;
+    std::cout<<"\x1b[1m\x1b[37mHyperText\x1b[0m ... \x1b[1m\x1b[36mStart\x1b[0m\n"<<std::endl;
 
 }
+
 void hyp::HypWindow::sidebar_toggle(){
     if (middle_window.property_position()>0){
         middle_window.set_position(0);
@@ -167,14 +174,14 @@ void hyp::HypWindow::sidebar_toggle(){
  *
  *
  *
- */ 
+ */
 void hyp::HypWindow::insert_tab(){
 
     std::cout<<"\033[A\33[2K\r"<<"Inserting Tab -> Empty"<<std::endl;
 
     Gtk::Box *box = Gtk::manage(new Gtk::Box());
     Gtk::Label *d = Gtk::manage(new Gtk::Label("untitled"));
-    
+
     // d->set_ellipsize(Pango::EllipsizeMode::ELLIPSIZE_MIDDLE);
     Gtk::Button *but = Gtk::manage(new Gtk::Button());
     vec_scroll.push_back(Gtk::ScrolledWindow());
@@ -184,7 +191,7 @@ void hyp::HypWindow::insert_tab(){
     box->pack_start(*d,true,true,2);
     box->pack_end(*but,false,false,0);
     box->show_all();
-   
+
     vec_text.push_back(hyp::HypTextView("untitled","",d,count));
     but->signal_clicked().connect( sigc::bind(sigc::mem_fun(*this,&hyp::HypWindow::on_tab_closed),count,vec_text[count].path));
 
@@ -196,9 +203,9 @@ void hyp::HypWindow::insert_tab(){
     but->signal_clicked().connect( sigc::bind(sigc::mem_fun(*this,&hyp::HypWindow::on_tab_closed),count,vec_text[count-icount].path));
     // nb.append_page(vec_scroll[count-icount],*box);
 
-    nb.append_page(vec_scroll[count],*box); 
+    nb.append_page(vec_scroll[count],*box);
 
-   
+
 
     (*text_track)[count]=(count-icount);
     (*types)[count]="text";
@@ -214,7 +221,7 @@ void hyp::HypWindow::insert_tab(){
  *
  *
  *
- */ 
+ */
 bool hyp::HypWindow::on_focus_out_event(GdkEventFocus* gdk_event){
 
     this->ApplicationWindow::on_focus_out_event(gdk_event);
@@ -227,10 +234,10 @@ bool hyp::HypWindow::on_focus_out_event(GdkEventFocus* gdk_event){
  *
  *
  *
- */ 
+ */
 bool hyp::HypWindow::on_key_press_event(GdkEventKey* key_event){
     this->ApplicationWindow::on_key_press_event(key_event);
-    
+
     if (key_event->keyval == GDK_KEY_Escape)
     {
         if (nb.get_n_pages()>0){
@@ -243,7 +250,7 @@ bool hyp::HypWindow::on_key_press_event(GdkEventKey* key_event){
  *
  *
  *
- */ 
+ */
 
 void hyp::HypWindow::on_tab_closed(int c,std::string path){
     std::cout<<"\033[A\33[2K\r"<<"Closing Tab : ";
@@ -266,9 +273,9 @@ void hyp::HypWindow::on_tab_closed(int c,std::string path){
  *
  *
  *
- */ 
+ */
 void hyp::HypWindow::on_file_open(){
-    
+
     std::cout<<"\033[A\33[2K\r"<<"Opening File (Imported) : ";
     auto dialog = Gtk::FileChooserNative::create("Please choose a file",*this,Gtk::FILE_CHOOSER_ACTION_OPEN,"Choose","Cancel");
     dialog->run();
@@ -277,7 +284,7 @@ void hyp::HypWindow::on_file_open(){
     std::string file = dialog->get_filename();
     if (file=="")
     {
-        
+
     }
     else{
 
@@ -293,8 +300,8 @@ void hyp::HypWindow::on_file_open(){
         box->show_all();
 
         if(std::filesystem::path(file).filename().extension().string()==".png" or std::filesystem::path(file).filename().extension().string()==".jpg" or std::filesystem::path(file).filename().extension().string()==".jpeg"  or std::filesystem::path(file).filename().extension().string()==".gif"){
-            
-            vec_imge.push_back(hyp::HypImgView(std::filesystem::path(file).filename(),file,count));        
+
+            vec_imge.push_back(hyp::HypImgView(std::filesystem::path(file).filename(),file,count));
             but->signal_clicked().connect( sigc::bind(sigc::mem_fun(*this,&hyp::HypWindow::on_tab_closed),count,vec_imge[icount].path));
             vec_scroll[count].add(vec_imge[icount]);
 
@@ -311,12 +318,12 @@ void hyp::HypWindow::on_file_open(){
             vec_text[count-icount].set_monospace(true);
             but->signal_clicked().connect( sigc::bind(sigc::mem_fun(*this,&hyp::HypWindow::on_tab_closed),count,vec_text[count-icount].path));
             // nb.append_page(vec_scroll[count-icount],*box);
-            nb.append_page(vec_scroll[count],*box); 
+            nb.append_page(vec_scroll[count],*box);
             (*text_track)[count]=(count-icount);
 
             (*types)[count]="text";
         }
-        
+
         // (vec_text[count].buffer)->set_text(Glib::file_get_contents(file));
         // (vec_text[count].buffer)->set_modified();
 
@@ -324,15 +331,15 @@ void hyp::HypWindow::on_file_open(){
         count+=1;
         show_all();
     }
-    
+
 }
 //###############################################################################
 /* activates when the tree column is clicked
  *
  *
- */ 
+ */
 void hyp::HypWindow::on_file_select(Glib::ustring fu){
-    std::cout<<"\033[A\33[2K\r"<<"Opening File (Selected): ";    
+    std::cout<<"\033[A\33[2K\r"<<"Opening File (Selected): ";
     std::cout<<fu<<std::endl;
 
     std::string file = fu.c_str();
@@ -349,8 +356,8 @@ void hyp::HypWindow::on_file_select(Glib::ustring fu){
     box->show_all();
 
     if(std::filesystem::path(file).filename().extension().string()==".png" or std::filesystem::path(file).filename().extension().string()==".jpg" or std::filesystem::path(file).filename().extension().string()==".jpeg"  or std::filesystem::path(file).filename().extension().string()==".gif"){
-        
-        vec_imge.push_back(hyp::HypImgView(std::filesystem::path(file).filename(),file,count));        
+
+        vec_imge.push_back(hyp::HypImgView(std::filesystem::path(file).filename(),file,count));
         but->signal_clicked().connect( sigc::bind(sigc::mem_fun(*this,&hyp::HypWindow::on_tab_closed),count,vec_imge[icount].path));
         vec_scroll[count].add(vec_imge[icount]);
 
@@ -367,17 +374,17 @@ void hyp::HypWindow::on_file_select(Glib::ustring fu){
         vec_text[count-icount].set_monospace(true);
         but->signal_clicked().connect( sigc::bind(sigc::mem_fun(*this,&hyp::HypWindow::on_tab_closed),count,vec_text[count-icount].path));
         // nb.append_page(vec_scroll[count-icount],*box);
-        nb.append_page(vec_scroll[count],*box); 
+        nb.append_page(vec_scroll[count],*box);
         (*text_track)[count]=(count-icount);
 
         (*types)[count]="text";
     }
-    
+
     tracker.insert(count);
     count+=1;
 
     show_all();
-    
+
 }
 //###############################################################################
 
@@ -395,7 +402,7 @@ void hyp::HypWindow::on_thread_call(){
  *
  *
  *
- */ 
+ */
 void hyp::HypWindow::on_save(){
 
     auto itrs = tracker.begin();
@@ -434,7 +441,7 @@ void hyp::HypWindow::on_save(){
             vec_text[(*text_track)[value]].l->set_label(vec_text[(*text_track)[value]].file_name);
             vec_text[(*text_track)[value]].defined();
         }
-        
+
 
     }
 
@@ -444,12 +451,12 @@ void hyp::HypWindow::on_save(){
  *
  *
  *
- */ 
+ */
 
 void hyp::HypWindow::on_save_focus(){
 
     auto itrs = tracker.begin();
-    auto value=0;
+    auto value = 0;
 
     for (std::set<int>::iterator i = tracker.begin(); i != tracker.end(); ++i){
         if(std::distance(itrs,i)==nb.get_current_page()){
@@ -460,14 +467,14 @@ void hyp::HypWindow::on_save_focus(){
     if ((*types)[value] != "image"){
         if (vec_text[(*text_track)[value]].path == ""){
 
-        
+
         }
         if(vec_text[(*text_track)[value]].path != ""){
             std::cout<<"Saving ~> "<<vec_text[(*text_track)[value]].path<<std::endl;
             Glib::file_set_contents(vec_text[(*text_track)[value]].path,vec_text[(*text_track)[value]].get_buffer()->get_text());
             vec_text[(*text_track)[value]].l->set_label(vec_text[(*text_track)[value]].file_name);
         }
-        
+
 
     }
 
@@ -477,7 +484,7 @@ void hyp::HypWindow::on_save_focus(){
  *
  *
  *
- */ 
+ */
 void hyp::HypWindow::on_save_as(){
 
     start:
@@ -514,8 +521,8 @@ void hyp::HypWindow::on_save_as(){
         std::cout<<"";
 }
 
-//############################################################################### 
-/* the function come in action when the "Open Folder" is clicked 
+//###############################################################################
+/* the function come in action when the "Open Folder" is clicked
  *
  *
  */
@@ -528,10 +535,10 @@ void hyp::HypWindow::on_folder_open(){
     std::string x = dialog->get_filename();
 
     if (x==""){
-        
+
     }else{
         status->set_label(std::string("Adding Folder - ")+x);
-        
+
         thr = new std::thread([=,this]{treeView->add_folder(x,this);});
         middle_window.set_position(250);
         show_all();
@@ -539,9 +546,9 @@ void hyp::HypWindow::on_folder_open(){
 }
 
 
-//############################################################################### 
+//###############################################################################
 /* Manages the File Type Label at the Bottom of the window using the Logic ...
- *    
+ *
  *
  */
 void hyp::HypWindow::on_tab_change(Gtk::Widget* page, guint page_number){
@@ -565,13 +572,13 @@ void hyp::HypWindow::on_tab_change(Gtk::Widget* page, guint page_number){
 }
 
 
-//############################################################################### 
+//###############################################################################
 // THE Destructor:
 hyp::HypWindow::~HypWindow(){
-    std::cout<<"\x1b[37mHyperText \x1b[35mQuit\x1b[0m ... Bye !"<<std::endl;
+    std::cout<<"\x1b[1m\x1b[37mHyperText \x1b[35mQuit\x1b[0m ... Bye !"<<std::endl;
 }
 
-//############################################################################### 
+//###############################################################################
 
 void hyp::HypWindow::on_menu_toggle(){
     bool active = false;
@@ -586,4 +593,4 @@ void hyp::HypWindow::on_menu_toggle(){
         focus_save = false;
 }
 
-//########################### Ok Enough For Now ############################################# 
+//########################### Ok Enough For Now #############################################

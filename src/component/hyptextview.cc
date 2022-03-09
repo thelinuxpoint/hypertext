@@ -9,9 +9,9 @@ hyp::HypTextView::HypTextView(std::string name,std::string path,Gtk::Label *labe
 	this->id = id;
 	Gdk::RGBA grey;
     grey.set("#181920");
-    
+
     Glib::RefPtr<Gsv::StyleSchemeManager> style = Gsv::StyleSchemeManager::create();
-	style->append_search_path("/usr/share/gtksourceview-3.0/styles/Kali-Dark.xml");    
+	style->append_search_path("/usr/share/gtksourceview-3.0/styles/Monokai.xml");
 	auto vec_x = style->get_scheme_ids();
 
 	// for (std::vector<std::string>::iterator i = vec_x.begin(); i != vec_x.end(); ++i)
@@ -24,7 +24,7 @@ hyp::HypTextView::HypTextView(std::string name,std::string path,Gtk::Label *labe
 	set_indent_on_tab();
 	set_indent_width(4);
 
-  	
+
 
 	if(this->path!=""){
 		Glib::RefPtr<Gsv::Language> lang;
@@ -39,15 +39,15 @@ hyp::HypTextView::HypTextView(std::string name,std::string path,Gtk::Label *labe
 
    		lang = x->guess_language(this->file_name, content_type);
    		Glib::RefPtr<Gsv::Buffer> buffer = Gsv::Buffer::create(lang);
-   		
+
     	set_buffer(buffer);
-   		buffer->set_style_scheme(style->get_scheme(vec_x[2]));
+   		buffer->set_style_scheme(style->get_scheme(vec_x[5]));
     	buffer->set_text(Glib::file_get_contents(this->path));
 
 	}
 
 	// std::cout<<get_name()<<std::endl;
-	
+
 	file_type_analyze(name);
 	set_accepts_tab(true);
 	set_indent(4);
@@ -60,9 +60,9 @@ hyp::HypTextView::HypTextView(std::string name,std::string path,Gtk::Label *labe
 
 bool hyp::HypTextView::on_key_press_event(GdkEventKey* key_event)
 {
-	
+
 	this->View::on_key_press_event(key_event);
-	
+
 	if (this->path != ""){
 		std::string x = Glib::file_get_contents(this->path);
 
@@ -72,14 +72,14 @@ bool hyp::HypTextView::on_key_press_event(GdkEventKey* key_event)
 			l->set_label(this->file_name);
 		}
 	}
-	return true;  
+	return true;
 }
 
 
 void hyp::HypTextView::defined(){
 
 	Glib::RefPtr<Gsv::StyleSchemeManager> style = Gsv::StyleSchemeManager::create();
-	style->append_search_path("/usr/share/gtksourceview-3.0/styles/Kali-Dark.xml");    
+	style->append_search_path("/usr/share/gtksourceview-3.0/styles/Monokai.xml");
 	auto vec_x = style->get_scheme_ids();
 
 	if(this->path!=""){
@@ -95,9 +95,10 @@ void hyp::HypTextView::defined(){
 
    		lang = x->guess_language(this->file_name, content_type);
    		Glib::RefPtr<Gsv::Buffer> buffer = Gsv::Buffer::create(lang);
-   		
+
     	set_buffer(buffer);
-   		buffer->set_style_scheme(style->get_scheme(vec_x[2]));
+
+   		buffer->set_style_scheme(style->get_scheme(vec_x[5]));
     	buffer->set_text(Glib::file_get_contents(this->path));
 
 	}
@@ -136,7 +137,3 @@ void hyp::HypTextView::file_type_analyze(std::string file){
 		this->file_type="Plain Text";
 	}
 }
-
-
-
-
