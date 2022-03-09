@@ -8,18 +8,18 @@ hyp::HypTextView::HypTextView(std::string name,std::string path,Gtk::Label *labe
 	this->path = path;
 	this->id = id;
 	Gdk::RGBA grey;
-    grey.set("#181920");
+    grey.set("#272822");
 
     Glib::RefPtr<Gsv::StyleSchemeManager> style = Gsv::StyleSchemeManager::create();
 	style->append_search_path("/usr/share/gtksourceview-3.0/styles/Monokai.xml");
 	auto vec_x = style->get_scheme_ids();
-
+	set_auto_indent();
 	// for (std::vector<std::string>::iterator i = vec_x.begin(); i != vec_x.end(); ++i)
 	// {
 	// 	std::cout<<*i<<std::endl;
 	// }
 	l = label;
-    override_background_color(grey);
+    // override_background_color(grey);
 	set_show_line_marks();
 	set_indent_on_tab();
 	set_indent_width(4);
@@ -43,7 +43,12 @@ hyp::HypTextView::HypTextView(std::string name,std::string path,Gtk::Label *labe
     	set_buffer(buffer);
    		buffer->set_style_scheme(style->get_scheme(vec_x[5]));
     	buffer->set_text(Glib::file_get_contents(this->path));
-
+    	buffer->set_highlight_syntax();
+	}else{
+		Glib::RefPtr<Gsv::Language> lang;
+   		Glib::RefPtr<Gsv::Buffer> buffer = Gsv::Buffer::create(lang);
+		set_buffer(buffer);
+   		buffer->set_style_scheme(style->get_scheme(vec_x[5]));
 	}
 
 	// std::cout<<get_name()<<std::endl;
@@ -51,6 +56,7 @@ hyp::HypTextView::HypTextView(std::string name,std::string path,Gtk::Label *labe
 	file_type_analyze(name);
 	set_accepts_tab(true);
 	set_indent(4);
+	set_tab_width(4);
 
 	// get_buffer()->signal_changed().connect(sigc::bind(sigc::mem_fun(*this,&hyp::HypTextView::on_buffer_changed),label));
 	// get_buffer()->signal_insert().connect(sigc::mem_fun(*this,&hyp::HypTextView::on_insert));

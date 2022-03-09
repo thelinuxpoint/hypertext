@@ -1,4 +1,5 @@
-HypTextView{
-    border-radius: 30px;
-	border-color:#CCCCCC;
+
+HypTextView {
+    background-color: #fff;
+    border-left: 2px solid yellowgreen;
 }

@@ -1,4 +1,54 @@
 #include "../header/hypwindow.h"
+#include <cairomm/context.h>
+
+class MyArea : public Gtk::DrawingArea
+{
+public:
+  MyArea(){
+    }
+  ~MyArea(){
+
+  }
+
+protected:
+  bool on_draw(const Cairo::RefPtr<Cairo::Context>& cr) override
+  {
+  // coordinates for the center of the window
+  Gtk::Allocation allocation = get_allocation();
+  const int width = allocation.get_width();
+  const int height = allocation.get_height();
+
+  // coordinates for the center of the window
+  int xc, yc;
+  xc = width / 2;
+  yc = height / 2;
+
+  cr->set_line_width(10.0);
+
+  // draw red lines out from the center of the window
+  cr->set_source_rgb(0.8, 0.0, 0.0);
+  cr->move_to(0, 0);
+  cr->line_to(xc, yc);
+  cr->line_to(0, height);
+  cr->move_to(xc, yc);
+  cr->line_to(width, yc);
+  cr->stroke();
+
+  return true;
+}
+
+};
+
+
+
+
+
+
+
+
+
+
+
 
 /* The Constructor:
  *
@@ -11,36 +61,43 @@ hyp::HypWindow::HypWindow(): Gtk::ApplicationWindow(){
     set_title("Hyper Text");
     set_default_size(1000, 650);
 
-    auto css = Gtk::CssProvider::create();
-    get_style_context()->add_provider_for_screen(Gdk::Screen::get_default(),
-                                               css,
-                                               GTK_STYLE_PROVIDER_PRIORITY_APPLICATION);
+
     Gdk::RGBA black_backk;
     black_backk.set("#151515");
     override_background_color(black_backk);
-
     Gdk::Color c;
     c.set_rgb(24,25,21);
-
+    MyArea m_a;
     Glib::ustring data;
-
-    data="textview text {color : white; font-size:50px; font-family:monospace; font-weight:bold;} ";
-
+    nb.override_background_color(black_backk);
+    data=".myNotebook tab {\
+        background-color: #151515;\
+        border:none;\
+        border-left: 5px solid yellowgreen;\
+    }\
+    .myNotebook tab:active {\
+        background-color: #151515;\
+        border-left: 5px solid yellow;\
+        border:none;\
+    }";
+    auto context = nb.get_style_context();
+    context->add_class("myNotebook");
     nb.set_scrollable(true);
 
 
-    if(not css->load_from_path(std::string(get_current_dir_name())+"/src/styles/style.css")) {
-        std::cerr << "Failed to load css\n";
-        std::exit(1);
-    }
+    Glib::RefPtr<Gtk::CssProvider> cssProvider = Gtk::CssProvider::create();
+	cssProvider->load_from_data(data);
+	// cssProvider->load_from_file(std::string(get_current_dir_name())+"/src/styles/style.css");
 
-    get_style_context()->add_provider_for_screen(Gdk::Screen::get_default(),
-                                               css,
-                                               GTK_STYLE_PROVIDER_PRIORITY_APPLICATION);
+	Glib::RefPtr<Gtk::StyleContext> styleContext = Gtk::StyleContext::create();
+
+	//get default screen
+	Glib::RefPtr<Gdk::Screen> screen = Gdk::Screen::get_default();
+
+	//add provider for screen in all application
+	styleContext->add_provider_for_screen(screen, cssProvider, GTK_STYLE_PROVIDER_PRIORITY_APPLICATION);
 
     for_tree = Gtk::manage(new Gtk::ScrolledWindow());
-
-
 
 
     types = new std::map<int,std::string>();
@@ -56,7 +113,6 @@ hyp::HypWindow::HypWindow(): Gtk::ApplicationWindow(){
     // m_TreeView->signal_row_expanded().connect( sigc::mem_fun(*this,&hyp::HypWindow::on_tree_click));
     // m_TreeView->signal_row_collapsed().connect( sigc::mem_fun(*this,&hyp::HypWindow::on_tree_click));
 
-    nb.override_background_color(black_backk);
     nb.signal_switch_page().connect( sigc::mem_fun(*this,&hyp::HypWindow::on_tab_change));
 
     // nb.
@@ -75,10 +131,13 @@ hyp::HypWindow::HypWindow(): Gtk::ApplicationWindow(){
 
 
 
+    nb.popup_enable();
+    for_shell->override_background_color(black_backk);
     v_window.pack1(middle_window,true,false);
     v_window.add2(*for_shell);
+
     Gdk::RGBA grey;
-    grey.set("#202120");
+    grey.set("#202122");
     v_window.override_background_color(grey);
 
     v_window.set_position(v_window.property_max_position());
@@ -123,19 +182,38 @@ hyp::HypWindow::HypWindow(): Gtk::ApplicationWindow(){
     status = Gtk::manage(new Gtk::Label());
 
     Gtk::Button *new_file = Gtk::manage(new Gtk::Button());
+    Gtk::Button *git = Gtk::manage(new Gtk::Button());
     Gtk::Button *eye = Gtk::manage(new Gtk::Button());
     Gtk::Image* image = Gtk::manage(new Gtk::Image{Gdk::Pixbuf::create_from_file( (std::string(get_current_dir_name())+"/src/resource/sidebar.svg"),20,20 )});
+    Gtk::Image* image1 = Gtk::manage(new Gtk::Image{Gdk::Pixbuf::create_from_file( (std::string(get_current_dir_name())+"/src/resource/github.dark.min.svg"),20,20 )});
 
     en = Gtk::manage(new Gtk::Entry());
+
+    // eye->set_tooltip("Toggle Sidebar");
+
     new_file->set_image_from_icon_name("document-new");
+    // new_file->set_tooltip("New File");
+
     Gdk::RGBA black_back;
 
     black_back.set("#121411");
-
+    new_file->override_background_color(black_back);
     new_file->signal_clicked().connect( sigc::mem_fun(*this,&hyp::HypWindow::insert_tab) );
+    git->set_image(*image1);
+    git->set_relief(Gtk::RELIEF_NONE);
+    git->set_tooltip_text("View Github Stats");
+
+    eye->set_size_request(10,10);
+
     eye->signal_clicked().connect( sigc::mem_fun(*this,&hyp::HypWindow::sidebar_toggle) );
     eye->set_image(*image);
+    eye->set_relief(Gtk::RELIEF_NONE);
+    eye->set_tooltip_text("Toggle Sidebar");
+
     new_file->set_size_request(10,10);
+    new_file->set_relief(Gtk::RELIEF_NONE);
+    new_file->set_tooltip_text("new file");
+
     toolbar.set_size_request(-1,27);
     toolbar.override_background_color(black_back);
 
@@ -143,6 +221,7 @@ hyp::HypWindow::HypWindow(): Gtk::ApplicationWindow(){
     toolbar.pack_start(*new_file,false,false,5);
 
     toolbar.pack_start(*status,false,false,10);
+    toolbar.pack_end(*git,false,false,10);
 
     toolbar.pack_end(*file,false,false,10);
 
@@ -287,6 +366,7 @@ void hyp::HypWindow::on_file_open(){
 
     }
     else{
+
 
         Gtk::Box *box = Gtk::manage(new Gtk::Box());
         Gtk::Label *d = Gtk::manage(new Gtk::Label(std::filesystem::path(file).filename().string()));

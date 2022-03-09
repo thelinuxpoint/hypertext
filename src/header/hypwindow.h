@@ -21,7 +21,7 @@
 
 
 namespace hyp{
-	
+
 
 	class HypWindow : public Gtk::ApplicationWindow {
 		public:
@@ -42,19 +42,19 @@ namespace hyp{
 			Gtk::Label *file;
 
 			Gtk::Label *status;
-			
+
 			Gtk::Button x;
-			
+
 			int count=0;
-  			
+
   			int m_row = 0;
-  			
+
   			int m_child = 0;
-  			
+
   			int thr_count = 0;
-			
+
 			int icount = 0;
-			
+
 			Gtk::Notebook nb;
 
 			std::vector<Gtk::ScrolledWindow> vec_scroll;
@@ -66,7 +66,7 @@ namespace hyp{
   			std::map<int,std::string> *types;
 
 			std::map<int,int> *text_track;
-  			
+
   			std::map<int,int> *img_track;
 
 			std::set<int> tracker;
@@ -76,7 +76,7 @@ namespace hyp{
 			Gtk::Entry *en;
   			//
   			std::thread *thr;
-  			// 
+  			//
   			Glib::Dispatcher hyp_dispatch;
 
 			// Gtk::ScrolledWindow for_tree;
@@ -93,9 +93,9 @@ namespace hyp{
 
   			/* Class Methods which are Public:
 			 *
-  			 */ 
+  			 */
   			void set_dir(std::string fold,Gtk::TreeModel::Row &row,std::string);
-			
+
 			std::string file_type_analyze(std::string file);
 
 			void on_thread_call();
@@ -105,7 +105,6 @@ namespace hyp{
 			void on_save();
 
 			void on_save_as();
-
   			void on_menu_others();
 
 			void on_new_window();
@@ -126,9 +125,9 @@ namespace hyp{
   			void insert_tab();
   			// close tab
   			void on_tab_closed(int c,std::string);
-  			// 
+  			//
   			void on_file_open();
-  			// 
+  			//
   			void on_folder_open();
 			bool on_key_press_event(GdkEventKey* key_event);
 			void on_file_select(Glib::ustring file);
