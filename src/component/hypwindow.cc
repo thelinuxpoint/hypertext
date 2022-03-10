@@ -63,15 +63,17 @@ hyp::HypWindow::HypWindow(): Gtk::ApplicationWindow(){
 
 
     Gdk::RGBA black_backk;
-    black_backk.set("#151515");
+    black_backk.set("#1e1f1c");
     override_background_color(black_backk);
     Gdk::Color c;
     c.set_rgb(24,25,21);
     MyArea m_a;
     Glib::ustring data;
     nb.override_background_color(black_backk);
-    data=".myNotebook tab {\
-        background-color: #151515;\
+
+    data="\
+    .myNotebook tab {\
+        background-color: #1e1f1c;\
         border:none;\
         border-left: 5px solid yellowgreen;\
     }\
@@ -79,10 +81,22 @@ hyp::HypWindow::HypWindow(): Gtk::ApplicationWindow(){
         background-color: #151515;\
         border-left: 5px solid yellow;\
         border:none;\
+    }\
+    .closebtn:hover{\
+        background-color: yellowgreen;\
+    }.myfloat{\
+        color:red\
+    }\
+    .txtview:hover{\
+        background-color: #44433C;color:yellowgreen;\
+    }.txtview{\
+        background-color: #1e1f1c;\
     }";
+
     auto context = nb.get_style_context();
     context->add_class("myNotebook");
     nb.set_scrollable(true);
+
 
 
     Glib::RefPtr<Gtk::CssProvider> cssProvider = Gtk::CssProvider::create();
@@ -106,13 +120,15 @@ hyp::HypWindow::HypWindow(): Gtk::ApplicationWindow(){
 
     hyp_dispatch.connect(sigc::mem_fun(*this,&hyp::HypWindow::on_thread_call));
 
-
+    Gtk::Button *flt = Gtk::manage(new Gtk::Button("Float"));
+    auto contextm = flt->get_style_context();
+    contextm->add_class("myfloat");
 
     treeView = Gtk::manage(new hyp::HypTreeView(this));
 
     // m_TreeView->signal_row_expanded().connect( sigc::mem_fun(*this,&hyp::HypWindow::on_tree_click));
     // m_TreeView->signal_row_collapsed().connect( sigc::mem_fun(*this,&hyp::HypWindow::on_tree_click));
-
+    nb.set_show_border();
     nb.signal_switch_page().connect( sigc::mem_fun(*this,&hyp::HypWindow::on_tab_change));
 
     // nb.
@@ -129,11 +145,12 @@ hyp::HypWindow::HypWindow(): Gtk::ApplicationWindow(){
     //vbox to middle window
     for_shell = Gtk::manage(new Gtk::ScrolledWindow());
 
+    font = new Pango::FontDescription("monospace 10");
 
-
+    for_shell->add(*flt);
     nb.popup_enable();
     for_shell->override_background_color(black_backk);
-    v_window.pack1(middle_window,true,false);
+    v_window.pack1(nb,true,false);
     v_window.add2(*for_shell);
 
     Gdk::RGBA grey;
@@ -141,12 +158,12 @@ hyp::HypWindow::HypWindow(): Gtk::ApplicationWindow(){
     v_window.override_background_color(grey);
 
     v_window.set_position(v_window.property_max_position());
-    v_window.set_wide_handle();
+    // v_window.set_wide_handle();
 
     middle_window.add1(*for_tree);
 
 
-    middle_window.add2(nb);
+    middle_window.add2(v_window);
 
     // notebook to middle window
     middle_window.set_position(0);
@@ -229,7 +246,7 @@ hyp::HypWindow::HypWindow(): Gtk::ApplicationWindow(){
     grand_window.pack_end(toolbar, false,false,0);
 
     // middlewindow to main window
-    grand_window.add(v_window);
+    grand_window.add(middle_window);
     // main window to Final Window
     add(grand_window);
     //  END  ############
@@ -263,6 +280,9 @@ void hyp::HypWindow::insert_tab(){
 
     // d->set_ellipsize(Pango::EllipsizeMode::ELLIPSIZE_MIDDLE);
     Gtk::Button *but = Gtk::manage(new Gtk::Button());
+    auto context = but->get_style_context();
+    context->add_class("closebtn");
+
     vec_scroll.push_back(Gtk::ScrolledWindow());
 
     but->set_image_from_icon_name("window-close");
@@ -371,6 +391,8 @@ void hyp::HypWindow::on_file_open(){
         Gtk::Box *box = Gtk::manage(new Gtk::Box());
         Gtk::Label *d = Gtk::manage(new Gtk::Label(std::filesystem::path(file).filename().string()));
         Gtk::Button *but = Gtk::manage(new Gtk::Button());
+        auto context = but->get_style_context();
+        context->add_class("closebtn");
         vec_scroll.push_back(Gtk::ScrolledWindow());
 
         but->set_image_from_icon_name("window-close");
@@ -427,6 +449,8 @@ void hyp::HypWindow::on_file_select(Glib::ustring fu){
     Gtk::Box *box = Gtk::manage(new Gtk::Box());
     Gtk::Label *d = Gtk::manage(new Gtk::Label(std::filesystem::path(file).filename().string()));
     Gtk::Button *but = Gtk::manage(new Gtk::Button());
+    auto context = but->get_style_context();
+    context->add_class("closebtn");
     vec_scroll.push_back(Gtk::ScrolledWindow());
 
     but->set_image_from_icon_name("window-close");
@@ -455,6 +479,7 @@ void hyp::HypWindow::on_file_select(Glib::ustring fu){
         but->signal_clicked().connect( sigc::bind(sigc::mem_fun(*this,&hyp::HypWindow::on_tab_closed),count,vec_text[count-icount].path));
         // nb.append_page(vec_scroll[count-icount],*box);
         nb.append_page(vec_scroll[count],*box);
+
         (*text_track)[count]=(count-icount);
 
         (*types)[count]="text";
@@ -473,7 +498,7 @@ void hyp::HypWindow::on_thread_call(){
 
     if(thr and thr->joinable()){
         thr->join();
-        status->set_label("Done");
+        status->set_label("done");
     }
 }
 
@@ -617,8 +642,7 @@ void hyp::HypWindow::on_folder_open(){
     if (x==""){
 
     }else{
-        status->set_label(std::string("Adding Folder - ")+x);
-
+        status->set_label(std::string("adding folder ")+x);
         thr = new std::thread([=,this]{treeView->add_folder(x,this);});
         middle_window.set_position(250);
         show_all();

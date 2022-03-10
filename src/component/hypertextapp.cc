@@ -20,7 +20,7 @@ void hyp::HypTextApp::on_startup(){
   	//File|New sub menu:
   	// add_action("newfile",sigc::mem_fun(*this, &hyp::HypTextApp::on_menu_file_new_generic));
  Gdk::RGBA black_backk;
-    black_backk.set("#171815");
+    black_backk.set("#1e1f1c");
   	add_action("newfoo",sigc::mem_fun(*this, &hyp::HypTextApp::on_menu_file_new_generic));
 
   	add_action("newgoo",sigc::mem_fun(*this, &hyp::HypTextApp::on_menu_file_new_generic));
@@ -33,7 +33,7 @@ void hyp::HypTextApp::on_startup(){
 
     add_action("newwindow", sigc::mem_fun(*this, &hyp::HypTextApp::on_new_window));
 
-    
+
 
 
   	m_refBuilder = Gtk::Builder::create();
@@ -124,7 +124,7 @@ void hyp::HypTextApp::on_startup(){
     ""
     "  <!-- application menu -->"
     "  <menu id='appmenu'>"
-    
+
     "  </menu>"
     "</interface>";
 

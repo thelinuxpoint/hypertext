@@ -1,5 +1,8 @@
 #include <gtksourceviewmm.h>
 #include <gtkmm.h>
+#include <gdkmm.h>
+#include <pangomm.h>
+
 #include <vector>
 #pragma once
 
@@ -83,6 +86,8 @@ namespace hyp{
 			Gtk::ScrolledWindow *for_tree;
 
 			Gtk::ScrolledWindow *for_shell;
+
+			Pango::FontDescription *font;
 
 			bool focus_save = false;
 

@@ -8,7 +8,7 @@
 
 hyp::HypTreeView::HypTreeView(hyp::HypWindow *parent){
 	//
-	Gdk::RGBA black_backk;black_backk.set("#151515");
+	Gdk::RGBA black_backk;black_backk.set("#1e1f1c");
 	//
 	m_Columns = new ModelColumns();
 	//
@@ -17,17 +17,16 @@ hyp::HypTreeView::HypTreeView(hyp::HypWindow *parent){
 	sorted_model = Gtk::TreeModelSort::create(m_refTreeModel);
 
 	sorted_model->set_sort_column(m_Columns->m_col_name, Gtk::SORT_ASCENDING);
-	get_style_context()->add_class("txtview");
+
     // initialize the treeview constructor
     Gtk::TreeView();
     // set the tree model
     set_model(sorted_model);
 	// set color for background
-	override_background_color(black_backk);
+	// override_background_color(black_backk);
 	//
     str = new std::string();
     org = new std::string();
-
 
 	set_vexpand();
 	//
@@ -52,7 +51,7 @@ hyp::HypTreeView::HypTreeView(hyp::HypWindow *parent){
 	cell_pix->set_property("pixbuf-expander-open", Gdk::Pixbuf::create_from_file( (std::string(get_current_dir_name())+"/src/resource/open0.svg")));
     cell_pix->set_property("pixbuf-expander-closed", Gdk::Pixbuf::create_from_file( (std::string(get_current_dir_name())+"/src/resource/close0.svg")));
     cell_pix->set_padding(3,1);
-
+	get_style_context()->add_class("txtview");
     //
     hpy_column->pack_start(*cell_pix,false);
     hpy_column->pack_start(*cell_txt, true);
