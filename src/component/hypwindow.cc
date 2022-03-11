@@ -1,55 +1,6 @@
 #include "../header/hypwindow.h"
 #include <cairomm/context.h>
 
-class MyArea : public Gtk::DrawingArea
-{
-public:
-  MyArea(){
-    }
-  ~MyArea(){
-
-  }
-
-protected:
-  bool on_draw(const Cairo::RefPtr<Cairo::Context>& cr) override
-  {
-  // coordinates for the center of the window
-  Gtk::Allocation allocation = get_allocation();
-  const int width = allocation.get_width();
-  const int height = allocation.get_height();
-
-  // coordinates for the center of the window
-  int xc, yc;
-  xc = width / 2;
-  yc = height / 2;
-
-  cr->set_line_width(10.0);
-
-  // draw red lines out from the center of the window
-  cr->set_source_rgb(0.8, 0.0, 0.0);
-  cr->move_to(0, 0);
-  cr->line_to(xc, yc);
-  cr->line_to(0, height);
-  cr->move_to(xc, yc);
-  cr->line_to(width, yc);
-  cr->stroke();
-
-  return true;
-}
-
-};
-
-
-
-
-
-
-
-
-
-
-
-
 /* The Constructor:
  *
  *
@@ -67,7 +18,6 @@ hyp::HypWindow::HypWindow(): Gtk::ApplicationWindow(){
     override_background_color(black_backk);
     Gdk::Color c;
     c.set_rgb(24,25,21);
-    MyArea m_a;
     Glib::ustring data;
     nb.override_background_color(black_backk);
 
@@ -89,9 +39,17 @@ hyp::HypWindow::HypWindow(): Gtk::ApplicationWindow(){
     }\
     .txtview:hover{\
         background-color: #44433C;color:yellowgreen;\
-    }.txtview{\
+    }\
+    .txtview{\
         background-color: #121411;\
-    }treeview.view header button { color: white; background: #121411; font-weight: bold; text-shadow: none; box-shadow: none;}";
+    }\
+    treeview.view header button {\
+         color: white;\
+         background: #121411;\
+         font-weight: bold;\
+         text-shadow: none;\
+         box-shadow: none;\
+     }";
 
     auto context = nb.get_style_context();
     context->add_class("myNotebook");
