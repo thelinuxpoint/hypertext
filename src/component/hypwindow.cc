@@ -63,7 +63,7 @@ hyp::HypWindow::HypWindow(): Gtk::ApplicationWindow(){
 
 
     Gdk::RGBA black_backk;
-    black_backk.set("#1e1f1c");
+    black_backk.set("#121411");
     override_background_color(black_backk);
     Gdk::Color c;
     c.set_rgb(24,25,21);
@@ -73,12 +73,12 @@ hyp::HypWindow::HypWindow(): Gtk::ApplicationWindow(){
 
     data="\
     .myNotebook tab {\
-        background-color: #1e1f1c;\
+        background-color: #121411;\
         border:none;\
         border-left: 5px solid yellowgreen;\
     }\
     .myNotebook tab:active {\
-        background-color: #151515;\
+        background-color: #121411;\
         border-left: 5px solid yellow;\
         border:none;\
     }\
@@ -90,8 +90,8 @@ hyp::HypWindow::HypWindow(): Gtk::ApplicationWindow(){
     .txtview:hover{\
         background-color: #44433C;color:yellowgreen;\
     }.txtview{\
-        background-color: #1e1f1c;\
-    }";
+        background-color: #121411;\
+    }treeview.view header button { color: white; background: #121411; font-weight: bold; text-shadow: none; box-shadow: none;}";
 
     auto context = nb.get_style_context();
     context->add_class("myNotebook");
