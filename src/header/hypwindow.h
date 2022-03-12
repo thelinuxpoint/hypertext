@@ -126,6 +126,7 @@ namespace hyp{
 
 			void on_row_insert(const Gtk::TreeModel::Path& path,const Gtk::TreeModel::iterator& iter);
 
+			void on_file_content_change(const Glib::RefPtr<Gio::File>&,const Glib::RefPtr<Gio::File>&,Gio::FileMonitorEvent,int vec);
   			// tab handler
   			void insert_tab();
   			// close tab

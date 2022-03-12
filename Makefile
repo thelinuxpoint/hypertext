@@ -79,7 +79,9 @@ install:
 			cp -r ./src/resource /usr/share/hypertext/ ;\
 		fi;\
 		printf "Installing HyperText@0.1.0 ... /usr/bin ...";\
+		rm -f /usr/bin/hypertext;\
 		cp ./build/hypertext /usr/bin/ ; \
+		rm -f /usr/share/applications/hypertext.desktop;\
 		cp hypertext.desktop /usr/share/applications/ ; \
 		cp ./src/resource/hyp.svg /usr/share/icons/hicolor/scalable/apps/ ;\
 	fi

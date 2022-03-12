@@ -428,7 +428,6 @@ void hyp::HypTreeView::on_menu_file_addfile(){
                 expand_to_path(Gtk::TreePath(*org+":"));
 
             }
-
             dialog->close();
             break;
         }
@@ -436,11 +435,8 @@ void hyp::HypTreeView::on_menu_file_addfile(){
             dialog->close();
             break;
         default:
-
             break;
     }
-
-
 }
 /*
  *

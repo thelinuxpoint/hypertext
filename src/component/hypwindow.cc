@@ -116,7 +116,7 @@ hyp::HypWindow::HypWindow(): Gtk::ApplicationWindow(){
     v_window.override_background_color(grey);
 
     v_window.set_position(v_window.property_max_position());
-    // v_window.set_wide_handle();
+    v_window.set_wide_handle();
 
     middle_window.add1(*for_tree);
 
@@ -144,14 +144,14 @@ hyp::HypWindow::HypWindow(): Gtk::ApplicationWindow(){
 
     //###########################################################################
 
-    //Choices menus, to demonstrate Radio items,
-    //using our convenience methods for string and int radio values:
+    // Choices menus, to demonstrate Radio items,
+    // using our convenience methods for string and int radio values:
     m_refToggle = add_action_bool("sometoggle",sigc::mem_fun(*this, &hyp::HypWindow::on_menu_toggle), false);
-    //Help menu:
+    // Help menu:
     // add_action("about", sigc::mem_fun(*this, &hyp::HypWindow::on_menu_others));
 
     //##########################################################################
-    //Create the toolbar and add it to a container widget:
+    // Create the toolbar and add it to a container widget:
     //##########################################################################
     file = Gtk::manage(new Gtk::Label("Plain Text"));
     status = Gtk::manage(new Gtk::Label());
@@ -159,10 +159,15 @@ hyp::HypWindow::HypWindow(): Gtk::ApplicationWindow(){
     Gtk::Button *new_file = Gtk::manage(new Gtk::Button());
     Gtk::Button *git = Gtk::manage(new Gtk::Button());
     Gtk::Button *eye = Gtk::manage(new Gtk::Button());
-    Gtk::Image* image = Gtk::manage(new Gtk::Image{Gdk::Pixbuf::create_from_file( (std::string(get_current_dir_name())+"/src/resource/sidebar.svg"),20,20 )});
-    Gtk::Image* image1 = Gtk::manage(new Gtk::Image{Gdk::Pixbuf::create_from_file( (std::string(get_current_dir_name())+"/src/resource/github.dark.min.svg"),20,20 )});
+    Gtk::Image* image = Gtk::manage(new Gtk::Image{Gdk::Pixbuf::create_from_file( "/usr/share/hypertext/resource/sidebar.svg",20,20 )});
+    Gtk::Image* image1 = Gtk::manage(new Gtk::Image{Gdk::Pixbuf::create_from_file( "/usr/share/hypertext/resource/github.dark.min.svg",20,20 )});
 
     en = Gtk::manage(new Gtk::Entry());
+    ///
+    // Gio::init();
+    // Gtk::Main::init_gtkmm_internals ();
+    // Glib::init();
+    ///
 
     // eye->set_tooltip("Toggle Sidebar");
 
@@ -272,6 +277,10 @@ void hyp::HypWindow::insert_tab(){
 
     show_all();
 }
+//
+void hyp::HypWindow::on_file_content_change(const Glib::RefPtr<Gio::File>&,const Glib::RefPtr<Gio::File>&,Gio::FileMonitorEvent , int vec){
+		vec_text[vec].refresh();
+}
 
 //###############################################################################
 /*
@@ -374,6 +383,8 @@ void hyp::HypWindow::on_file_open(){
 
             vec_text.push_back(hyp::HypTextView(std::filesystem::path(file).filename(),file,d,count));
             vec_scroll[count].add(vec_text[count-icount]);
+            vec_text[count-icount].mm_file->signal_changed().connect( sigc::bind(sigc::mem_fun(*this,&hyp::HypWindow::on_file_content_change),count-icount),false );;
+
             vec_text[count-icount].set_show_line_numbers(true);
             vec_text[count-icount].set_monospace(true);
             but->signal_clicked().connect( sigc::bind(sigc::mem_fun(*this,&hyp::HypWindow::on_tab_closed),count,vec_text[count-icount].path));
@@ -434,6 +445,8 @@ void hyp::HypWindow::on_file_select(Glib::ustring fu){
         vec_scroll[count].add(vec_text[count-icount]);
         vec_text[count-icount].set_show_line_numbers(true);
         vec_text[count-icount].set_monospace(true);
+        vec_text[count-icount].mm_file->signal_changed().connect( sigc::bind(sigc::mem_fun(*this,&hyp::HypWindow::on_file_content_change),count-icount),false );;
+
         but->signal_clicked().connect( sigc::bind(sigc::mem_fun(*this,&hyp::HypWindow::on_tab_closed),count,vec_text[count-icount].path));
         // nb.append_page(vec_scroll[count-icount],*box);
         nb.append_page(vec_scroll[count],*box);
@@ -495,6 +508,7 @@ void hyp::HypWindow::on_save(){
             }
             vec_text[(*text_track)[value]].path = dialog->get_filename();
             vec_text[(*text_track)[value]].file_name = std::filesystem::path(dialog->get_filename()).filename().string();
+
         end:
             std::cout<<"";
         }
@@ -503,6 +517,8 @@ void hyp::HypWindow::on_save(){
             Glib::file_set_contents(vec_text[(*text_track)[value]].path,vec_text[(*text_track)[value]].get_buffer()->get_text());
             vec_text[(*text_track)[value]].l->set_label(vec_text[(*text_track)[value]].file_name);
             vec_text[(*text_track)[value]].defined();
+            vec_text[(*text_track)[value]].mm_file->signal_changed().connect( sigc::bind(sigc::mem_fun(*this,&hyp::HypWindow::on_file_content_change),(*text_track)[value]),false );
+
         }
 
 
