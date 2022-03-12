@@ -1,8 +1,9 @@
 #include "../header/hypwindow.h"
 #include <cairomm/context.h>
 
+
 /* The Constructor:
- *
+ *   init
  *
  *
  *
@@ -267,8 +268,6 @@ void hyp::HypWindow::insert_tab(){
 
     nb.append_page(vec_scroll[count],*box);
 
-
-
     (*text_track)[count]=(count-icount);
     (*types)[count]="text";
 
@@ -279,7 +278,8 @@ void hyp::HypWindow::insert_tab(){
 }
 //
 void hyp::HypWindow::on_file_content_change(const Glib::RefPtr<Gio::File>&,const Glib::RefPtr<Gio::File>&,Gio::FileMonitorEvent , int vec){
-		vec_text[vec].refresh();
+    status->set_label(std::string("reloading [ ")+vec_text[vec].file_name+" ]");
+    vec_text[vec].refresh();
 }
 
 //###############################################################################
