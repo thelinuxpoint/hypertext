@@ -64,7 +64,7 @@ hyp::HypTextView::HypTextView(std::string name,std::string path,Gtk::Label *labe
 	set_accepts_tab(true);
 	set_indent(4);
 	set_tab_width(4);
-
+	set_right_margin_position(80);
 	// get_buffer()->signal_changed().connect(sigc::bind(sigc::mem_fun(*this,&hyp::HypTextView::on_buffer_changed),label));
 	// get_buffer()->signal_insert().connect(sigc::mem_fun(*this,&hyp::HypTextView::on_insert));
 	// signal_key_press_event().connect( sigc::ptr_fun(&hyp::on_buffer_changed));
