@@ -45,7 +45,7 @@ hyp::HypTextView::HypTextView(std::string name,std::string path,Gtk::Label *labe
     	}
 
    		lang = x->guess_language(this->file_name, content_type);
-   		Glib::RefPtr<Gsv::Buffer> buffer = Gsv::Buffer::create(lang);
+   		buffer = Gsv::Buffer::create(lang);
 
     	set_buffer(buffer);
    		buffer->set_style_scheme(style->get_scheme(vec_x[5]));
@@ -53,7 +53,7 @@ hyp::HypTextView::HypTextView(std::string name,std::string path,Gtk::Label *labe
     	buffer->set_highlight_syntax();
 	}else{
 		Glib::RefPtr<Gsv::Language> lang;
-   		Glib::RefPtr<Gsv::Buffer> buffer = Gsv::Buffer::create(lang);
+   		buffer = Gsv::Buffer::create(lang);
 		set_buffer(buffer);
    		buffer->set_style_scheme(style->get_scheme(vec_x[5]));
 	}
@@ -86,30 +86,8 @@ bool hyp::HypTextView::on_key_press_event(GdkEventKey* key_event)
 	return true;
 }
 void hyp::HypTextView::refresh(){
-	Glib::RefPtr<Gsv::StyleSchemeManager> style = Gsv::StyleSchemeManager::create();
-	style->append_search_path("/usr/share/gtksourceview-3.0/styles/Monokai.xml");
-	auto vec_x = style->get_scheme_ids();
-	
-	if(this->path!=""){
-		Glib::RefPtr<Gsv::Language> lang;
-		Glib::RefPtr<Gsv::LanguageManager> x = Gsv::LanguageManager::create();
 
-		bool result_uncertain = FALSE;
-    	Glib::ustring content_type;
-    	content_type = Gio::content_type_guess(this->file_name, 0, 0, result_uncertain);
-    	if (result_uncertain){
-      		content_type.clear();
-    	}
-
-   		lang = x->guess_language(this->file_name, content_type);
-   		Glib::RefPtr<Gsv::Buffer> buffer = Gsv::Buffer::create(lang);
-
-    	set_buffer(buffer);
-
-   		buffer->set_style_scheme(style->get_scheme(vec_x[5]));
     	buffer->set_text(Glib::file_get_contents(this->path));
-
-	}
 }
 
 void hyp::HypTextView::defined(){
@@ -131,8 +109,7 @@ void hyp::HypTextView::defined(){
     	}
 
    		lang = x->guess_language(this->file_name, content_type);
-   		Glib::RefPtr<Gsv::Buffer> buffer = Gsv::Buffer::create(lang);
-
+   		buffer = Gsv::Buffer::create(lang);
     	set_buffer(buffer);
 
    		buffer->set_style_scheme(style->get_scheme(vec_x[5]));

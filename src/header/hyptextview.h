@@ -22,7 +22,7 @@ namespace hyp{
 			bool is_defined;
 			int id;
 
-			Glib::RefPtr<Gtk::TextBuffer> buffer = get_buffer();
+			Glib::RefPtr<Gsv::Buffer> buffer;
 
 			HypTextView(std::string name,std::string path,Gtk::Label *label,int id);
 
@@ -37,7 +37,7 @@ namespace hyp{
 			void on_buffer_changed(std::string x);
 
 			void refresh();
-			
+
 			void defined();
 	};
 }

@@ -471,3 +471,5 @@ void hyp::HypTreeView::on_tree_click(const Gtk::TreeModel::iterator& iter, const
     columns_autosize();
     check_resize();
 }
+
+

@@ -1,7 +1,5 @@
 #include "../header/hypwindow.h"
 #include <cairomm/context.h>
-
-
 /* The Constructor:
  *   init
  *
@@ -87,6 +85,7 @@ hyp::HypWindow::HypWindow(): Gtk::ApplicationWindow(){
 
     // m_TreeView->signal_row_expanded().connect( sigc::mem_fun(*this,&hyp::HypWindow::on_tree_click));
     // m_TreeView->signal_row_collapsed().connect( sigc::mem_fun(*this,&hyp::HypWindow::on_tree_click));
+
     nb.set_show_border();
     nb.signal_switch_page().connect( sigc::mem_fun(*this,&hyp::HypWindow::on_tab_change));
 
@@ -277,9 +276,11 @@ void hyp::HypWindow::insert_tab(){
     show_all();
 }
 //
-void hyp::HypWindow::on_file_content_change(const Glib::RefPtr<Gio::File>&,const Glib::RefPtr<Gio::File>&,Gio::FileMonitorEvent , int vec){
-    status->set_label(std::string("reloading [ ")+vec_text[vec].file_name+" ]");
-    vec_text[vec].refresh();
+void hyp::HypWindow::on_file_content_change(const Glib::RefPtr<Gio::File>&,const Glib::RefPtr<Gio::File>&,Gio::FileMonitorEvent event, int vec){
+    if(event == Gio::FileMonitorEvent::FILE_MONITOR_EVENT_CHANGED){
+        status->set_label(std::string("reloading [ ")+vec_text[vec].file_name+" ]");
+        vec_text[vec].refresh();
+    }
 }
 
 //###############################################################################
@@ -508,7 +509,10 @@ void hyp::HypWindow::on_save(){
             }
             vec_text[(*text_track)[value]].path = dialog->get_filename();
             vec_text[(*text_track)[value]].file_name = std::filesystem::path(dialog->get_filename()).filename().string();
-
+            Glib::file_set_contents(vec_text[(*text_track)[value]].path,vec_text[(*text_track)[value]].get_buffer()->get_text());
+            vec_text[(*text_track)[value]].l->set_label(vec_text[(*text_track)[value]].file_name);
+            vec_text[(*text_track)[value]].defined();
+            vec_text[(*text_track)[value]].mm_file->signal_changed().connect( sigc::bind(sigc::mem_fun(*this,&hyp::HypWindow::on_file_content_change),(*text_track)[value]),false );
         end:
             std::cout<<"";
         }
@@ -516,8 +520,6 @@ void hyp::HypWindow::on_save(){
             std::cout<<"Saving ~> "<<vec_text[(*text_track)[value]].path<<std::endl;
             Glib::file_set_contents(vec_text[(*text_track)[value]].path,vec_text[(*text_track)[value]].get_buffer()->get_text());
             vec_text[(*text_track)[value]].l->set_label(vec_text[(*text_track)[value]].file_name);
-            vec_text[(*text_track)[value]].defined();
-            vec_text[(*text_track)[value]].mm_file->signal_changed().connect( sigc::bind(sigc::mem_fun(*this,&hyp::HypWindow::on_file_content_change),(*text_track)[value]),false );
 
         }
 
