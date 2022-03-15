@@ -4,6 +4,8 @@ Hyper-Text is currently only for linux systems
     <img src="https://thelinuxpoint.github.io/hypertext.svg" />
 </div>
 
+[![CircleCI](https://circleci.com/gh/thelinuxpoint/hypertext/tree/main.svg?style=shield)](https://circleci.com/gh/thelinuxpoint/hypertext/tree/main)
+
 ## Download HyperText
 
 ```shell
