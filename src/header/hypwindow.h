@@ -20,6 +20,7 @@
 #include "../header/hypimgview.h"
 #include "../header/hypworker.h"
 #include "../header/hyptreeview.h"
+#include "../header/hypshell.h"
 
 
 
@@ -62,6 +63,7 @@ namespace hyp{
 
 			std::vector<Gtk::ScrolledWindow> vec_scroll;
 
+
 			std::vector<hyp::HypTextView> vec_text;
 
 			std::vector<hyp::HypImgView> vec_imge;
@@ -86,6 +88,8 @@ namespace hyp{
 			Gtk::ScrolledWindow *for_tree;
 
 			Gtk::ScrolledWindow *for_shell;
+
+			hyp::HypShell *s;
 
 			Pango::FontDescription *font;
 

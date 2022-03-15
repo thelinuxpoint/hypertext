@@ -28,13 +28,13 @@ hyp::HypWindow::HypWindow(): Gtk::ApplicationWindow(){
     }\
     .myNotebook tab:active {\
         background-color: #121411;\
-        border-left: 5px solid yellow;\
+        border-left: 5px solid yellowgreen;\
         border:none;\
     }\
     .closebtn:hover{\
         background-color: yellowgreen;\
     }.myfloat{\
-        color:red\
+        background-color: #121411;\
     }\
     .txtview:hover{\
         background-color: #44433C;color:yellowgreen;\
@@ -77,9 +77,7 @@ hyp::HypWindow::HypWindow(): Gtk::ApplicationWindow(){
 
     hyp_dispatch.connect(sigc::mem_fun(*this,&hyp::HypWindow::on_thread_call));
 
-    Gtk::Button *flt = Gtk::manage(new Gtk::Button("Float"));
-    auto contextm = flt->get_style_context();
-    contextm->add_class("myfloat");
+
 
     treeView = Gtk::manage(new hyp::HypTreeView(this));
 
@@ -101,15 +99,17 @@ hyp::HypWindow::HypWindow(): Gtk::ApplicationWindow(){
     //scrollbar to vbox
     // tree.add(*for_tree);
     //vbox to middle window
-    for_shell = Gtk::manage(new Gtk::ScrolledWindow());
+
 
     font = new Pango::FontDescription("monospace 10");
+    for_shell = Gtk::manage(new Gtk::ScrolledWindow());
+    s = Gtk::manage(new hyp::HypShell());
 
-    for_shell->add(*flt);
+    for_shell->add(*s);
     nb.popup_enable();
     for_shell->override_background_color(black_backk);
     v_window.pack1(nb,true,false);
-    v_window.add2(*for_shell);
+    v_window.pack2(*for_shell);
 
     Gdk::RGBA grey;
     grey.set("#202122");

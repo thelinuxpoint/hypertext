@@ -12,9 +12,8 @@
 #include <unistd.h>
 //
 namespace hyp{
-	class HypShell : public Gtk::TextView {
+	class HypShell : public Gsv::View {
 		public:
   			HypShell();
-  			
   	};
 }

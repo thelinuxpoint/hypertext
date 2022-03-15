@@ -114,12 +114,8 @@ void hyp::HypTextView::defined(){
 
    		buffer->set_style_scheme(style->get_scheme(vec_x[5]));
     	buffer->set_text(Glib::file_get_contents(this->path));
-
 	}
 }
-
-
-
 
 
 void hyp::HypTextView::file_type_analyze(std::string file){
@@ -147,6 +143,10 @@ void hyp::HypTextView::file_type_analyze(std::string file){
 		this->file_type="Java";
 	}else if(std::filesystem::path(file).extension().string()==".json"){
 		this->file_type="JSON";
+	}else if(std::filesystem::path(file).extension().string()==".sh"){
+		this->file_type="Bash";
+	}else if(std::filesystem::path(file).extension().string()==".bat"){
+		this->file_type="Batch";
 	}else{
 		this->file_type="Plain Text";
 	}
