@@ -104,12 +104,13 @@ hyp::HypWindow::HypWindow(): Gtk::ApplicationWindow(){
     font = new Pango::FontDescription("monospace 10");
     for_shell = Gtk::manage(new Gtk::ScrolledWindow());
     s = Gtk::manage(new hyp::HypShell());
+    s->override_background_color(black_backk);
 
     for_shell->add(*s);
     nb.popup_enable();
     for_shell->override_background_color(black_backk);
     v_window.pack1(nb,true,false);
-    v_window.pack2(*for_shell);
+    v_window.add2(*for_shell);
 
     Gdk::RGBA grey;
     grey.set("#202122");
@@ -309,6 +310,16 @@ bool hyp::HypWindow::on_key_press_event(GdkEventKey* key_event){
     {
         if (nb.get_n_pages()>0){
             this->on_save_focus();
+        }
+    }else if(key_event->keyval == GDK_KEY_F11){
+        if(fulls == false){
+            fullscreen();
+            status->set_label("Entered FullScreen");
+            fulls = true;
+        }else{
+            unfullscreen();
+            status->set_label("Exited FullScreen");
+            fulls=false;
         }
     }
 }

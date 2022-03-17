@@ -95,6 +95,7 @@ namespace hyp{
 
 			bool focus_save = false;
 
+			bool fulls = false;
   			//#####################################################
 
   			/* Class Methods which are Public:
