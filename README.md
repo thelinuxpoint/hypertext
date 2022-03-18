@@ -1,7 +1,7 @@
 # Hyper-Text
 Hyper-Text is currently only for linux systems
 <div align="center">
-    <img src="https://thelinuxpoint.github.io/hypertext.svg" />
+    <img src="https://github.com/thelinuxpoint/hypertext/blob/main/src/resource/hyp.svg" width="200px" height="200px"/>
 </div>
 
 [![CircleCI](https://circleci.com/gh/thelinuxpoint/hypertext/tree/main.svg?style=shield)](https://circleci.com/gh/thelinuxpoint/hypertext/tree/main)
