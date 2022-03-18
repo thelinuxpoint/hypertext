@@ -16,9 +16,9 @@
 
 namespace hyp{
 	class HypWindow;
-	
+
 	class HypTreeView: public Gtk::TreeView {
-		
+
 		public:
 		HypTreeView(hyp::HypWindow *parent);
 
@@ -26,18 +26,18 @@ namespace hyp{
 //Tree model columns:
   			class ModelColumns : public Gtk::TreeModel::ColumnRecord{
   				public:
-    				ModelColumns(){ 	
-    					add(m_col_name); 
-    					add(m_col_pix);    					add(m_col_path);
+    				ModelColumns(){
+    					add(m_col_name);
+    					add(m_col_pix);
+						add(m_col_path);
 
     				}
     				Gtk::TreeModelColumn<Glib::ustring> m_col_name;
     				Gtk::TreeModelColumn<Glib::ustring> m_col_path;
-    				
 
     				Gtk::TreeModelColumn<Glib::RefPtr<Gdk::Pixbuf>> m_col_pix;
   			};
-			
+
 			ModelColumns *m_Columns;
 //
   			Gtk::TreeViewColumn *hpy_column;
@@ -55,9 +55,9 @@ namespace hyp{
 
 
   			int m_row = 0;
-			
+
 			std::mutex mtx;
-  			
+
   			Gtk::Menu m_Menu_1;
 
   			Gtk::Menu m_Menu_2;
@@ -72,7 +72,7 @@ namespace hyp{
   			void add_folder(std::string path,hyp::HypWindow *caller);
 
   			void set_dir(std::string fold,Gtk::TreeModel::Row &row,std::string x);
-			
+
 			void on_tree_click(const Gtk::TreeModel::iterator& iter, const Gtk::TreeModel::Path& path);
 
 			std::string file_type_analyze(std::string file);
@@ -81,7 +81,7 @@ namespace hyp{
 
   			//Signal handler for popup menu items:
   			void on_menu_file_addfolder();
-  			
+
   			void on_menu_file_removefolder();
 
   			void on_menu_file_addfile();

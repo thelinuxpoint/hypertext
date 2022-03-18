@@ -132,33 +132,33 @@ bool hyp::HypTreeView::on_row_select(const Glib::RefPtr<Gtk::TreeModel>& b,const
     //
     if(std::filesystem::is_regular_file(Glib::ustring((*it)[m_Columns->m_col_path]).raw()) and (selected->count(Glib::ustring((*it)[m_Columns->m_col_path]).raw()) == 0) ){
         if (check_ext == ".cc" or check_ext == ".cpp" ){
-            (*it)[m_Columns->m_col_pix] = Gdk::Pixbuf::create_from_file( "/usr/share/hypertext/resource/cpp/cpp.svg",24,24 );
+            (*it)[m_Columns->m_col_pix] = Gdk::Pixbuf::create_from_file( "/usr/share/hypertext/resource/cpp/cpp.svg",20,20 );
         }else if(check_ext == ".c"){
-            (*it)[m_Columns->m_col_pix] = Gdk::Pixbuf::create_from_file( "/usr/share/hypertext/resource/c/c.svg",24,24 );
+            (*it)[m_Columns->m_col_pix] = Gdk::Pixbuf::create_from_file( "/usr/share/hypertext/resource/c/c.svg",20,20 );
         }else if(check_ext == ".md"){
-            (*it)[m_Columns->m_col_pix] = Gdk::Pixbuf::create_from_file( "/usr/share/hypertext/resource/md/md.svg",24,24 );
+            (*it)[m_Columns->m_col_pix] = Gdk::Pixbuf::create_from_file( "/usr/share/hypertext/resource/md/md.svg",20,20 );
         }else if(check_ext == ".o"){
-            (*it)[m_Columns->m_col_pix] = Gdk::Pixbuf::create_from_file( "/usr/share/hypertext/resource/exe.svg",24,24 );
+            (*it)[m_Columns->m_col_pix] = Gdk::Pixbuf::create_from_file( "/usr/share/hypertext/resource/exe.svg",20,20 );
         }else if(check_ext == ".svg"){
-            (*it)[m_Columns->m_col_pix] = Gdk::Pixbuf::create_from_file( "/usr/share/hypertext/resource/xml/xml.svg",24,24 );
+            (*it)[m_Columns->m_col_pix] = Gdk::Pixbuf::create_from_file( "/usr/share/hypertext/resource/xml/xml.svg",20,20 );
         }else if(check_ext == ".py"){
-            (*it)[m_Columns->m_col_pix] = Gdk::Pixbuf::create_from_file( "/usr/share/hypertext/resource/python/python.svg",24,24 );
+            (*it)[m_Columns->m_col_pix] = Gdk::Pixbuf::create_from_file( "/usr/share/hypertext/resource/python/python.svg",20,20 );
         }else if(check_ext == ".php"){
-            (*it)[m_Columns->m_col_pix] = Gdk::Pixbuf::create_from_file( "/usr/share/hypertext/resource/php/php.svg",24,24 );
+            (*it)[m_Columns->m_col_pix] = Gdk::Pixbuf::create_from_file( "/usr/share/hypertext/resource/php/php.svg",20,20 );
         }else if(check_ext == ".rb"){
-            (*it)[m_Columns->m_col_pix] = Gdk::Pixbuf::create_from_file( "/usr/share/hypertext/resource/ruby/ruby.svg",22,22 );
+            (*it)[m_Columns->m_col_pix] = Gdk::Pixbuf::create_from_file( "/usr/share/hypertext/resource/ruby/ruby.svg",18,18 );
         }else if(check_ext == ".rs"){
-            (*it)[m_Columns->m_col_pix] = Gdk::Pixbuf::create_from_file( "/usr/share/hypertext/resource/rust/rust.svg",22,22 );
+            (*it)[m_Columns->m_col_pix] = Gdk::Pixbuf::create_from_file( "/usr/share/hypertext/resource/rust/rust.svg",18,18 );
         }else if(check_ext == ".js"){
-            (*it)[m_Columns->m_col_pix] = Gdk::Pixbuf::create_from_file( "/usr/share/hypertext/resource/js/js.svg",24,24 );
+            (*it)[m_Columns->m_col_pix] = Gdk::Pixbuf::create_from_file( "/usr/share/hypertext/resource/js/js.svg",20,20 );
         }else if(check_ext == ".css"){
-            (*it)[m_Columns->m_col_pix] = Gdk::Pixbuf::create_from_file( "/usr/share/hypertext/resource/css3/css3.svg",24,24 );
+            (*it)[m_Columns->m_col_pix] = Gdk::Pixbuf::create_from_file( "/usr/share/hypertext/resource/css3/css3.svg",18,18 );
         }else if(check_ext == ".json"){
-            (*it)[m_Columns->m_col_pix] = Gdk::Pixbuf::create_from_file( "/usr/share/hypertext/resource/json/json.svg",24,24 );
+            (*it)[m_Columns->m_col_pix] = Gdk::Pixbuf::create_from_file( "/usr/share/hypertext/resource/json/json.svg",20,20 );
         }else if(check_ext == ".jpg" or check_ext == ".png" or check_ext == ".jpeg"){
-            (*it)[m_Columns->m_col_pix] = Gdk::Pixbuf::create_from_file( "/usr/share/hypertext/resource/drawing.svg",24,24 );
+            (*it)[m_Columns->m_col_pix] = Gdk::Pixbuf::create_from_file( "/usr/share/hypertext/resource/drawing.svg",20,20 );
         }else{
-            (*it)[m_Columns->m_col_pix] = Gdk::Pixbuf::create_from_file( "/usr/share/hypertext/resource/text2.svg",24,24 );
+            (*it)[m_Columns->m_col_pix] = Gdk::Pixbuf::create_from_file( "/usr/share/hypertext/resource/text2.svg",20,20 );
         }
 
         parent->on_file_select((*it)[m_Columns->m_col_path]);
@@ -196,8 +196,10 @@ void hyp::HypTreeView::add_folder(std::string path,hyp::HypWindow *caller){
  *
  */
 void hyp::HypTreeView::set_dir(std::string fold,Gtk::TreeModel::Row &row,std::string x){
+	
     row[m_Columns->m_col_name] = std::filesystem::path(fold).filename().string();
     row[m_Columns->m_col_path] = std::filesystem::path(fold).string();
+	row[m_Columns->m_col_pix] = Gdk::Pixbuf::create_from_file( "/usr/share/hypertext/resource/close0.svg");
 
     x=x+":";
     int m_child=0;
@@ -220,36 +222,35 @@ void hyp::HypTreeView::set_dir(std::string fold,Gtk::TreeModel::Row &row,std::st
             auto check_ext = dir_entry.path().filename().extension().string();
 
             if (check_ext == ".cc" or check_ext == ".cpp" ){
-                childrow[m_Columns->m_col_pix] = Gdk::Pixbuf::create_from_file( "/usr/share/hypertext/resource/cpp/cpp.svg",24,24 );
+                childrow[m_Columns->m_col_pix] = Gdk::Pixbuf::create_from_file( "/usr/share/hypertext/resource/cpp/cpp.svg",20,20 );
             }else if(check_ext == ".c"){
-                childrow[m_Columns->m_col_pix] = Gdk::Pixbuf::create_from_file( "/usr/share/hypertext/resource/c/c.svg",24,24 );
+                childrow[m_Columns->m_col_pix] = Gdk::Pixbuf::create_from_file( "/usr/share/hypertext/resource/c/c.svg",20,20 );
             }else if(check_ext == ".md"){
-                childrow[m_Columns->m_col_pix] = Gdk::Pixbuf::create_from_file( "/usr/share/hypertext/resource/md/md.svg",24,24 );
+                childrow[m_Columns->m_col_pix] = Gdk::Pixbuf::create_from_file( "/usr/share/hypertext/resource/md/md.svg",20,20 );
             }else if(check_ext == ".svg"){
-                childrow[m_Columns->m_col_pix] = Gdk::Pixbuf::create_from_file( "/usr/share/hypertext/resource/xml/xml.svg",24,24 );
+                childrow[m_Columns->m_col_pix] = Gdk::Pixbuf::create_from_file( "/usr/share/hypertext/resource/xml/xml.svg",20,20 );
             }else if(check_ext == ".py"){
-                childrow[m_Columns->m_col_pix] = Gdk::Pixbuf::create_from_file( "/usr/share/hypertext/resource/python/python.svg",24,24 );
+                childrow[m_Columns->m_col_pix] = Gdk::Pixbuf::create_from_file( "/usr/share/hypertext/resource/python/python.svg",20,20 );
             }else if(check_ext == ".php"){
-                childrow[m_Columns->m_col_pix] = Gdk::Pixbuf::create_from_file( "/usr/share/hypertext/resource/php/php.svg",24,24 );
+                childrow[m_Columns->m_col_pix] = Gdk::Pixbuf::create_from_file( "/usr/share/hypertext/resource/php/php.svg",20,20 );
             }else if(check_ext == ".rb"){
-                childrow[m_Columns->m_col_pix] = Gdk::Pixbuf::create_from_file( "/usr/share/hypertext/resource/ruby/ruby.svg",22,22 );
+                childrow[m_Columns->m_col_pix] = Gdk::Pixbuf::create_from_file( "/usr/share/hypertext/resource/ruby/ruby.svg",18,18 );
             }else if(check_ext == ".rs"){
-                childrow[m_Columns->m_col_pix] = Gdk::Pixbuf::create_from_file( "/usr/share/hypertext/resource/rust/rust.svg",22,22 );
+                childrow[m_Columns->m_col_pix] = Gdk::Pixbuf::create_from_file( "/usr/share/hypertext/resource/rust/rust.svg",18,18 );
             }else if(check_ext == ".js"){
-                childrow[m_Columns->m_col_pix] = Gdk::Pixbuf::create_from_file( "/usr/share/hypertext/resource/js/js.svg",24,24 );
+                childrow[m_Columns->m_col_pix] = Gdk::Pixbuf::create_from_file( "/usr/share/hypertext/resource/js/js.svg",20,20 );
             }else if(check_ext == ".css"){
-                childrow[m_Columns->m_col_pix] = Gdk::Pixbuf::create_from_file( "/usr/share/hypertext/resource/css3/css3.svg",24,24 );
+                childrow[m_Columns->m_col_pix] = Gdk::Pixbuf::create_from_file( "/usr/share/hypertext/resource/css3/css3.svg",18,18 );
             }else if(check_ext == ".json"){
-                childrow[m_Columns->m_col_pix] = Gdk::Pixbuf::create_from_file( "/usr/share/hypertext/resource/json/json.svg",24,24 );
+                childrow[m_Columns->m_col_pix] = Gdk::Pixbuf::create_from_file( "/usr/share/hypertext/resource/json/json.svg",20,20 );
             }else if(check_ext == ".jpg" or check_ext == ".png" or check_ext == ".jpeg"){
-                childrow[m_Columns->m_col_pix] = Gdk::Pixbuf::create_from_file( "/usr/share/hypertext/resource/drawing.svg",24,24 );
+                childrow[m_Columns->m_col_pix] = Gdk::Pixbuf::create_from_file( "/usr/share/hypertext/resource/drawing.svg",20,20 );
             }else{
-                childrow[m_Columns->m_col_pix] = Gdk::Pixbuf::create_from_file( "/usr/share/hypertext/resource/text2.svg",24,24 );
+                childrow[m_Columns->m_col_pix] = Gdk::Pixbuf::create_from_file( "/usr/share/hypertext/resource/text2.svg",20,20 );
             }
 
             childrow[m_Columns->m_col_name] = dir_entry.path().filename().string();
             childrow[m_Columns->m_col_path] = dir_entry.path().string();
-
 
             // for Debuging only:
             // std::cout<<(x+std::to_string(m_child))<<std::endl;
@@ -417,7 +418,7 @@ void hyp::HypTreeView::on_menu_file_addfile(){
                 Gtk::TreeModel::Row row = *(m_refTreeModel->append(c->children()));
 
                 row[m_Columns->m_col_name] = entry->get_text();
-                row[m_Columns->m_col_pix] = Gdk::Pixbuf::create_from_file( "/usr/share/hypertext/resource/text2.svg",24,24 );
+                row[m_Columns->m_col_pix] = Gdk::Pixbuf::create_from_file( "/usr/share/hypertext/resource/text2.svg",20,20 );
                 row[m_Columns->m_col_path] = Glib::ustring((*tmp)[m_Columns->m_col_path]).raw()+"/"+entry->get_text();
 
 
@@ -471,5 +472,3 @@ void hyp::HypTreeView::on_tree_click(const Gtk::TreeModel::iterator& iter, const
     columns_autosize();
     check_resize();
 }
-
-
