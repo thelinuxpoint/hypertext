@@ -13,7 +13,9 @@ jobs:
 
     steps:
     - uses: actions/checkout@v3
-    - name: make
+    - name: dependencies
       run: sudo apt-get install libgtkmm-3.0-dev libgtksourceviewmm-3.0-dev -y
+    - name: create dir
       run: mkdir build
+    - name: make
       run: make
